@@ -1,0 +1,11 @@
+ALGORITMO CONTAGEM_ENQUANTO:
+    DECLARE i : INTEIRO;
+INICIO
+    i <- 1;
+    ENQUANTO(i <= 10) FACA
+        INICIO
+            ESCREVA(i);
+            i++;
+        FIM
+    FIMENQUANTO
+FIMALGORITMO

@@ -1,0 +1,27 @@
+ALGORITMO TIPOS_E_FUNCOES:
+    DECLARE NOME : CARACTERES;
+    DECLARE IDADE : INTEIRO;
+    DECLARE ALTURA : NUMERICO;
+    DECLARE CODIGO : ALFANUMERICOS;
+    DECLARE MAIOR_IDADE : LOGICOS;
+INICIO
+    ESCREVA("Nome:");
+    LEIA(NOME);
+    ESCREVA("Idade:");
+    LEIA(IDADE);
+    ESCREVA("Altura (m):");
+    LEIA(ALTURA);
+
+    MAIOR_IDADE <- IDADE >= 18;
+    CODIGO <- MAIUSCULO(SUBTEXTO(NOME, 1, 3)) + PARA_TEXTO(IDADE);
+
+    ESCREVA("Olá,", NOME);
+    ESCREVA("Maior de idade?", MAIOR_IDADE);
+    ESCREVA("Seu código:", CODIGO);
+    ESCREVA("Altura arredondada:", ROUND(ALTURA, 1));
+    ESCREVA("Resto de IDADE por 7:", IDADE MOD 7, "| divisão inteira:", IDADE DIV 7);
+
+    SE(NAO MAIOR_IDADE E ALTURA > 1.5) ENTAO
+        ESCREVA("Menor de idade, mas já é alto(a)!");
+    FIMSE
+FIMALGORITMO
