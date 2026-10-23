@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Pseudocódigo JS</title>
+<meta name="description" content="Escreva seus algoritmos e execute no navegador.">
+<style>
+:root {
+  --fundo: #e9f0f5;
+  --papel: #f7fafc;
+  --pauta: #d6e5ee;
+  --margem: #e0525e;
+  --tinta: #1d2b4f;
+  --tinta-suave: #55658a;
+  --borda: #c2d1dd;
+  --acento: #1f4fd8;
+  --acento-texto: #ffffff;
+  --lousa: #1e2b28;
+  --giz: #eef1e8;
+  --giz-suave: #9fb0a6;
+  --giz-amarelo: #f2d16b;
+  --giz-rosa: #ff9aa2;
+
+  --c-kw: #1f4fd8;
+  --c-tipo: #862e9c;
+  --c-fn: #1f7a35;
+  --c-str: #8a5a00;
+  --c-num: #0b7285;
+  --c-com: #5f6f92;
+
+  --sans: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "Cascadia Mono", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --fs: 15px;
+  --lh: 24px;
+  --pad: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #0e1322;
+    --papel: #151c30;
+    --pauta: #232f4d;
+    --tinta: #dbe3f7;
+    --tinta-suave: #9aa8c7;
+    --borda: #2b3757;
+    --acento: #7fa2ff;
+    --acento-texto: #0e1322;
+    --lousa: #121b19;
+    --c-kw: #8fb0ff;
+    --c-tipo: #d3a3f2;
+    --c-fn: #7fd99a;
+    --c-str: #f2c86b;
+    --c-num: #6fd3e6;
+    --c-com: #8c9ab8;
+  }
+}
+@media (max-width: 860px) {
+  :root { --fs: 16px; --lh: 26px; }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--tinta);
+  font: 15px/1.5 var(--sans);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+@media (min-width: 861px) {
+  body { height: 100vh; height: 100dvh; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+/* ---------- topo e barra de ações ---------- */
+.topo {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px;
+  padding: 14px 20px 4px;
+}
+.topo h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+.topo p { margin: 0; color: var(--tinta-suave); font-size: 14px; flex: 1 1 260px; }
+.topo a { color: var(--tinta-suave); font-size: 14px; }
+.topo a:hover { color: var(--acento); }
+
+.barra {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px;
+  padding: 8px 20px 10px;
+}
+.grupo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+button, select {
+  font: inherit; font-size: 14px; color: var(--tinta);
+  height: 36px; padding: 0 14px;
+  border: 1px solid var(--borda); border-radius: 6px;
+  background: var(--papel); cursor: pointer; white-space: nowrap;
+}
+select { padding-right: 8px; max-width: 220px; }
+button:hover:not(:disabled), select:hover:not(:disabled) { border-color: var(--tinta-suave); }
+button:disabled, select:disabled { opacity: .5; cursor: default; }
+button.principal {
+  background: var(--acento); color: var(--acento-texto);
+  border-color: var(--acento); font-weight: 600;
+}
+button.principal:hover:not(:disabled) { filter: brightness(1.08); border-color: var(--acento); }
+
+/* ---------- painéis ---------- */
+.paineis {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px;
+  padding: 0 20px 8px;
+}
+.painel { display: flex; flex-direction: column; min-height: 0; }
+.cab { display: flex; align-items: center; justify-content: space-between; margin: 0 0 6px; min-height: 22px; }
+.cab h2 { margin: 0; font-size: 14px; font-weight: 650; color: var(--tinta-suave); }
+
+.estado { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--tinta-suave); }
+.estado::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ponto, #8a97b3);
+}
+.estado[data-estado="executando"] { --ponto: #d99a00; }
+.estado[data-estado="entrada"] { --ponto: var(--acento); }
+.estado[data-estado="ok"] { --ponto: #2f9e44; }
+.estado[data-estado="erro"] { --ponto: var(--margem); }
+
+/* ---------- editor: caderno pautado ---------- */
+.editor {
+  flex: 1; min-height: 0; display: flex; overflow: hidden;
+  background: var(--papel); border: 1px solid var(--borda); border-radius: 6px;
+  font: var(--fs) / var(--lh) var(--mono);
+  font-variant-ligatures: none;
+}
+.numeros {
+  flex: none; overflow: hidden; margin: 0;
+  width: calc(var(--ndig, 2) * 1ch + 30px);
+  padding: var(--pad) 10px calc(var(--pad) + 80px) 0;
+  text-align: right; white-space: pre; user-select: none;
+  color: var(--tinta-suave);
+  border-right: 2px solid var(--margem);
+  font: inherit;
+}
+.numeros .erro { color: var(--margem); font-weight: 700; }
+.codigo { position: relative; flex: 1; min-width: 0; }
+
+.camada, .codigo textarea {
+  position: absolute; inset: 0; margin: 0; border: 0;
+  padding: var(--pad) 14px calc(var(--pad) + 80px) 14px;
+  font: inherit; font-variant-ligatures: none;
+  tab-size: 4; white-space: pre; word-wrap: normal; letter-spacing: normal;
+}
+.camada {
+  overflow: hidden; pointer-events: none; color: var(--tinta);
+  background-image: linear-gradient(to bottom, transparent calc(var(--lh) - 1px), var(--pauta) calc(var(--lh) - 1px));
+  background-size: 100% var(--lh);
+  background-attachment: local;
+  background-origin: content-box;
+  background-clip: padding-box;
+}
+.codigo textarea {
+  overflow: auto; resize: none; outline: none;
+  background: transparent; color: transparent; -webkit-text-fill-color: transparent;
+  caret-color: var(--tinta);
+}
+.codigo textarea::selection { background: color-mix(in srgb, var(--acento) 30%, transparent); }
+.camada .p { color: var(--c-kw); font-weight: 700; }
+.camada .t { color: var(--c-tipo); font-weight: 700; }
+.camada .f { color: var(--c-fn); }
+.camada .s { color: var(--c-str); }
+.camada .n { color: var(--c-num); }
+.camada .c { color: var(--c-com); font-style: italic; }
+.camada .marca {
+  position: absolute; left: 0; width: 100000px; height: var(--lh);
+  background: color-mix(in srgb, var(--margem) 14%, transparent);
+}
+
+/* ---------- saída: lousa ---------- */
+.lousa {
+  flex: 1; min-height: 0; overflow: auto;
+  background: var(--lousa); color: var(--giz);
+  border-radius: 6px; padding: 12px 14px;
+  font: var(--fs) / 1.5 var(--mono);
+}
+.lousa:focus-visible { outline-offset: -2px; }
+.lousa pre { margin: 0; font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; }
+.lousa pre:empty::before { content: attr(data-vazio); color: var(--giz-suave); font-family: var(--sans); }
+.lousa .e { color: var(--giz-rosa); }
+.lousa .i { color: var(--giz-amarelo); }
+.lousa .s { color: var(--giz-suave); }
+.entrada { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.entrada .seta { color: var(--giz-amarelo); }
+.entrada input {
+  flex: 1; min-width: 0; font: inherit; color: var(--giz-amarelo);
+  background: transparent; border: 0; border-bottom: 1px dashed var(--giz-suave);
+  padding: 2px 0; outline: none;
+}
+.entrada input:focus { border-bottom-color: var(--giz-amarelo); }
+.entrada button {
+  height: 28px; padding: 0 10px; font-size: 13px;
+  color: var(--giz); background: transparent; border-color: var(--giz-suave);
+}
+
+.rodape { padding: 6px 20px 14px; font-size: 13px; color: var(--tinta-suave); }
+.rodape p { margin: 0; }
+
+@media (max-width: 860px) {
+  .barra { gap: 8px; }
+  .grupo.acoes { order: -1; width: 100%; }
+  .grupo.acoes button { flex: 1 1 auto; }
+  .grupo.acoes .principal { flex: 2 1 auto; }
+  .grupo.arquivos { width: 100%; }
+  .grupo.arquivos select { flex: 1 1 100%; max-width: none; }
+  .grupo.arquivos button { flex: 1; }
+  .paineis { grid-template-columns: 1fr; padding-bottom: 12px; }
+  .editor { height: 56vh; min-height: 280px; flex: none; }
+  .lousa { height: 40vh; min-height: 200px; flex: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <h1>Pseudocódigo JS</h1>
+  <p>Escreva um algoritmo em portugol e execute aqui, sem instalar nada.</p>
+  <a href="https://github.com/weslinho/pseudocodigo">Código no GitHub</a>
+</header>
+
+<div class="barra" role="toolbar" aria-label="Ações">
+  <div class="grupo arquivos">
+    <label class="visually-hidden" for="exemplos">Carregar um exemplo</label>
+    <select id="exemplos"><option value="">Carregar exemplo</option></select>
+    <button id="abrir" type="button">Abrir arquivo</button>
+    <button id="baixar" type="button">Baixar .alg</button>
+    <input id="arquivo" type="file" accept=".alg,.txt,.md,text/plain" hidden>
+  </div>
+  <div class="grupo acoes">
+    <button id="verificar" type="button">Verificar erros</button>
+    <button id="parar" type="button" disabled>Parar</button>
+    <button id="executar" type="button" class="principal" title="Atalho: Ctrl+Enter">Executar</button>
+  </div>
+</div>
+
+<main class="paineis">
+  <section class="painel" aria-labelledby="t-codigo">
+    <div class="cab"><h2 id="t-codigo">Algoritmo</h2></div>
+    <div class="editor">
+      <pre class="numeros" id="numeros" aria-hidden="true">1</pre>
+      <div class="codigo">
+        <pre class="camada" id="camada" aria-hidden="true"></pre>
+        <textarea id="editor" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off"
+                  aria-label="Editor do algoritmo"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="painel" aria-labelledby="t-saida">
+    <div class="cab">
+      <h2 id="t-saida">Saída</h2>
+      <span class="estado" id="estado" data-estado="pronto" role="status">Pronto</span>
+    </div>
+    <div class="lousa" id="lousa" role="log" aria-live="polite" tabindex="0">
+      <pre id="saida" data-vazio="A saída do programa aparece aqui. Aperte Executar para começar."></pre>
+      <form class="entrada" id="form-entrada" hidden>
+        <span class="seta" aria-hidden="true">&rsaquo;</span>
+        <input id="campo-entrada" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               aria-label="Valor pedido pelo programa" placeholder="Digite o valor e aperte Enter">
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script src="pseudo.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var P = window.Pseudo;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var CHAVE = 'pseudocodigo-js:programa';
+  var MAX_ITERACOES = 2000000;   // mais baixo que o do terminal: um laço infinito é detectado em ~1 s
+  var MAX_SAIDA = 300000;        // caracteres; evita travar a página com um laço que escreve sem parar
+
+  var INICIAL =
+    'ALGORITMO OLA:\n' +
+    '    DECLARE NOME : CARACTERES;\n' +
+    'INICIO\n' +
+    '    ESCREVA("Qual é o seu nome?");\n' +
+    '    LEIA(NOME);\n' +
+    '    ESCREVA("Olá,", NOME);\n' +
+    'FIMALGORITMO\n';
+
+  // Títulos com acento para os exemplos conhecidos; os novos usam o nome do arquivo.
+  var TITULOS = {
+    '01_fahrenheit': 'Fahrenheit para Celsius',
+    '02_mes_se': 'Nome do mês com SE',
+    '03_escolha_mes': 'Nome do mês com ESCOLHA',
+    '04_enquanto': 'Contagem com ENQUANTO',
+    '05_repita': 'Contagem com REPITA',
+    '06_para_tabuada': 'Tabuada com PARA',
+    '07_bhaskara': 'Equação do 2º grau (Bhaskara)',
+    '08_tipos_e_funcoes': 'Tipos e funções'
+  };
+
+  var el = {
+    editor: $('editor'), camada: $('camada'), numeros: $('numeros'),
+    saida: $('saida'), lousa: $('lousa'), estado: $('estado'),
+    form: $('form-entrada'), campo: $('campo-entrada'),
+    executar: $('executar'), parar: $('parar'), verificar: $('verificar'),
+    abrir: $('abrir'), baixar: $('baixar'), arquivo: $('arquivo'), exemplos: $('exemplos')
+  };
+
+  /* ---------------- realce de sintaxe ---------------- */
+
+  var pal = P.palavras;
+  var TIPOS = new Set(pal.NOMES_TIPOS);
+  var OPERADORES = new Set(['E', 'OU', 'NAO', 'DIV', 'MOD']);
+  var CONSTANTES = new Set(['VERDADEIRO', 'FALSO', 'PI']);
+  var TOKEN = /\/\*[\s\S]*?(?:\*\/|$)|(?:#|\/\/)[^\n]*|"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|\d+(?:\.\d+)?|[\p{L}_][\p{L}\p{N}_]*/gu;
+
+  function escapar(t) {
+    return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function classeDe(t) {
+    var c = t[0];
+    if (c === '#' || c === '/') return 'c';
+    if (c === '"' || c === "'") return 's';
+    if (c >= '0' && c <= '9') return 'n';
+    var n = pal.normalizar(t);
+    if (TIPOS.has(n)) return 't';
+    if (pal.NOMES_FUNCOES.has(n)) return 'f';
+    if (CONSTANTES.has(n)) return 'n';
+    if (OPERADORES.has(n) || pal.RESERVADAS.has(n)) return 'p';
+    return null;
+  }
+
+  function destacar(codigo) {
+    var html = '', ultimo = 0, m;
+    TOKEN.lastIndex = 0;
+    while ((m = TOKEN.exec(codigo))) {
+      html += escapar(codigo.slice(ultimo, m.index));
+      var cls = classeDe(m[0]);
+      html += cls ? '<span class="' + cls + '">' + escapar(m[0]) + '</span>' : escapar(m[0]);
+      ultimo = m.index + m[0].length;
+    }
+    return html + escapar(codigo.slice(ultimo));
+  }
+
+  var linhaComErro = null;
+
+  function atualizarEditor() {
+    var texto = el.editor.value;
+    var qtd = texto.split('\n').length;
+    var marca = '';
+    if (linhaComErro && linhaComErro <= qtd) {
+      marca = '<i class="marca" style="top:calc(var(--pad) + ' + (linhaComErro - 1) + ' * var(--lh))"></i>';
+    }
+    el.camada.innerHTML = marca + destacar(texto) + '\n ';
+
+    var nums = '';
+    for (var i = 1; i <= qtd; i++) {
+      nums += (i === linhaComErro ? '<span class="erro">' + i + '</span>' : i) + (i < qtd ? '\n' : '');
+    }
+    el.numeros.innerHTML = nums;
+    el.numeros.style.setProperty('--ndig', Math.max(2, String(qtd).length));
+    sincronizarRolagem();
+  }
+
+  function sincronizarRolagem() {
+    el.camada.scrollTop = el.editor.scrollTop;
+    el.camada.scrollLeft = el.editor.scrollLeft;
+    el.numeros.scrollTop = el.editor.scrollTop;
+  }
+
+  function marcarErro(linha) {
+    linhaComErro = linha || null;
+    atualizarEditor();
+  }
+
+  /* ---------------- edição: Tab, Enter e recuo ---------------- */
+
+  var soltarTab = false;
+
+  function inserir(texto) {
+    el.editor.focus();
+    if (!document.execCommand('insertText', false, texto)) {
+      el.editor.setRangeText(texto, el.editor.selectionStart, el.editor.selectionEnd, 'end');
+      el.editor.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  function recuar(desfazer) {
+    var v = el.editor.value, ini = el.editor.selectionStart, fim = el.editor.selectionEnd;
+    var iniLinha = v.lastIndexOf('\n', ini - 1) + 1;
+    var fimLinha = (fim > ini && v[fim - 1] === '\n') ? fim - 1 : v.indexOf('\n', fim);
+    if (fimLinha === -1) fimLinha = v.length;
+    var novo = v.slice(iniLinha, fimLinha).split('\n').map(function (l) {
+      return desfazer ? l.replace(/^( {1,4}|\t)/, '') : '    ' + l;
+    }).join('\n');
+    el.editor.setSelectionRange(iniLinha, fimLinha);
+    inserir(novo);
+    el.editor.setSelectionRange(iniLinha, iniLinha + novo.length);
+  }
+
+  el.editor.addEventListener('keydown', function (e) {
+    if (e.isComposing) return;
+    if (e.key === 'Escape') { soltarTab = true; return; }
+    if (e.key === 'Tab' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      if (soltarTab) return;                       // Esc + Tab: deixa o foco sair do editor
+      e.preventDefault();
+      var multilinha = el.editor.value.slice(el.editor.selectionStart, el.editor.selectionEnd).indexOf('\n') !== -1;
+      if (multilinha || e.shiftKey) recuar(e.shiftKey);
+      else inserir('    ');
+      return;
+    }
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      var v = el.editor.value, pos = el.editor.selectionStart;
+      var ini = v.lastIndexOf('\n', pos - 1) + 1;
+      var recuo = /^[ \t]*/.exec(v.slice(ini, pos))[0];
+      if (recuo) { e.preventDefault(); inserir('\n' + recuo); }
+    }
+  });
+  el.editor.addEventListener('blur', function () { soltarTab = false; });
+
+  var modificado = false, salvarTimer = null;
+
+  el.editor.addEventListener('input', function () {
+    modificado = true;
+    if (linhaComErro) linhaComErro = null;
+    atualizarEditor();
+    clearTimeout(salvarTimer);
+    salvarTimer = setTimeout(salvarLocal, 400);
+  });
+  el.editor.addEventListener('scroll', sincronizarRolagem);
+
+  function salvarLocal() {
+    try { localStorage.setItem(CHAVE, el.editor.value); } catch (e) { /* sem armazenamento: tudo bem */ }
+  }
+  function lerLocal() {
+    try { return localStorage.getItem(CHAVE); } catch (e) { return null; }
+  }
+
+  function definirCodigo(texto) {
+    el.editor.value = texto.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+    el.editor.setSelectionRange(0, 0);
+    el.editor.scrollTop = 0; el.editor.scrollLeft = 0;
+    modificado = false;
+    linhaComErro = null;
+    atualizarEditor();
+    salvarLocal();
+  }
+
+  /* ---------------- saída e entrada (LEIA) ---------------- */
+
+  var ESTADOS = {
+    pronto: 'Pronto', executando: 'Executando', entrada: 'Aguardando valor',
+    ok: 'Finalizado', erro: 'Com erro', parado: 'Interrompido'
+  };
+  function definirEstado(chave) {
+    el.estado.dataset.estado = chave === 'parado' ? 'pronto' : chave;
+    el.estado.textContent = ESTADOS[chave];
+  }
+
+  var rolagemPendente = false;
+  function rolarFim() {
+    if (rolagemPendente) return;
+    rolagemPendente = true;
+    requestAnimationFrame(function () {
+      rolagemPendente = false;
+      el.lousa.scrollTop = el.lousa.scrollHeight;
+    });
+  }
+
+  function acrescentar(texto, classe) {
+    var no = document.createTextNode(texto);
+    if (classe) {
+      var span = document.createElement('span');
+      span.className = classe;
+      span.appendChild(no);
+      el.saida.appendChild(span);
+    } else {
+      el.saida.appendChild(no);
+    }
+    rolarFim();
+  }
+
+  function separador() { return el.saida.textContent ? '\n' : ''; }
+
+  function limparSaida() {
+    el.saida.textContent = '';
+    esconderEntrada();
+  }
+
+  function esconderEntrada() { el.form.hidden = true; el.campo.value = ''; }
+
+  function criarES(controlador, estado) {
+    var total = 0;
+    return {
+      escrever: function (texto) {
+        if (estado.cortado) return;
+        total += texto.length;
+        if (total > MAX_SAIDA) {
+          estado.cortado = true;
+          acrescentar(separador() + 'Saída muito longa (mais de ' + MAX_SAIDA.toLocaleString('pt-BR') +
+            ' caracteres). A execução foi interrompida: confira se há um laço que nunca termina.\n', 'e');
+          controlador.abort();
+          return;
+        }
+        acrescentar(texto);
+      },
+      lerLinha: function () {
+        return new Promise(function (resolver, rejeitar) {
+          var sinal = controlador.signal;
+          function aoAbortar() {
+            el.form.onsubmit = null;
+            esconderEntrada();
+            rejeitar(new DOMException('Interrompido', 'AbortError'));
+          }
+          if (sinal.aborted) { aoAbortar(); return; }
+          sinal.addEventListener('abort', aoAbortar, { once: true });
+          definirEstado('entrada');
+          el.form.hidden = false;
+          rolarFim();
+          el.campo.focus();
+          el.form.onsubmit = function (ev) {
+            ev.preventDefault();
+            var valor = el.campo.value;
+            sinal.removeEventListener('abort', aoAbortar);
+            el.form.onsubmit = null;
+            esconderEntrada();
+            acrescentar(valor + '\n', 'i');
+            definirEstado('executando');
+            resolver(valor);
+          };
+        });
+      }
+    };
+  }
+
+  /* ---------------- executar, parar e verificar ---------------- */
+
+  var execucao = null;
+
+  function aoMudarExecucao() {
+    var rodando = execucao !== null;
+    el.executar.disabled = rodando;
+    el.verificar.disabled = rodando;
+    el.parar.disabled = !rodando;
+    el.exemplos.disabled = rodando;
+    el.abrir.disabled = rodando;
+  }
+
+  function mostrarErro(e, fonte) {
+    if (e instanceof P.PseudoError) {
+      acrescentar(separador() + P.formatarErro(e, fonte) + '\n', 'e');
+      if (e.linha) marcarErro(e.linha);
+    } else {
+      acrescentar(separador() + 'Erro interno do interpretador: ' + (e && e.message ? e.message : e) + '\n', 'e');
+      if (window.console) console.error(e);
+    }
+  }
+
+  function executar() {
+    if (execucao) return;
+    var fonte = el.editor.value.replace(/^\uFEFF/, '');
+    var controlador = new AbortController();
+    var estado = { cortado: false };
+    execucao = { controlador: controlador };
+    aoMudarExecucao();
+    limparSaida();
+    marcarErro(null);
+    definirEstado('executando');
+
+    P.executar(fonte, criarES(controlador, estado), { sinal: controlador.signal, maxIteracoes: MAX_ITERACOES })
+      .then(function () {
+        acrescentar(separador() + 'Programa finalizado.\n', 's');
+        definirEstado('ok');
+      })
+      .catch(function (e) {
+        if (estado.cortado) { definirEstado('erro'); return; }
+        if (e && e.name === 'AbortError') {
+          acrescentar(separador() + 'Execução interrompida.\n', 's');
+          definirEstado('parado');
+          return;
+        }
+        if (controlador.signal.aborted && e instanceof P.PseudoError && e.tipo === 'Execução interrompida') {
+          acrescentar(separador() + 'Execução interrompida (linha ' + e.linha + ').\n', 's');
+          definirEstado('parado');
+          if (e.linha) marcarErro(e.linha);
+          return;
+        }
+        mostrarErro(e, fonte);
+        definirEstado('erro');
+      })
+      .then(function () {
+        execucao = null;
+        esconderEntrada();
+        aoMudarExecucao();
+      });
+  }
+
+  function parar() { if (execucao) execucao.controlador.abort(); }
+
+  function verificar() {
+    if (execucao) return;
+    var fonte = el.editor.value.replace(/^\uFEFF/, '');
+    limparSaida();
+    marcarErro(null);
+    try {
+      P.compilar(fonte);
+      acrescentar('Nenhum erro encontrado.\n', 's');
+      definirEstado('ok');
+    } catch (e) {
+      mostrarErro(e, fonte);
+      definirEstado('erro');
+    }
+  }
+
+  el.executar.addEventListener('click', executar);
+  el.parar.addEventListener('click', parar);
+  el.verificar.addEventListener('click', verificar);
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); executar(); }
+  });
+
+  /* ---------------- exemplos, abrir e baixar ---------------- */
+
+  function confirmarSubstituicao() {
+    if (!modificado || !el.editor.value.trim()) return true;
+    return window.confirm('Substituir o algoritmo atual? As alterações que você fez no editor serão perdidas.');
+  }
+
+  var nomeArquivo = 'programa.alg';
+
+  (P.EXEMPLOS || []).forEach(function (ex, i) {
+    var base = ex.arquivo.replace(/\.[^.]+$/, '');
+    var titulo = TITULOS[base] || base.replace(/^\d+_/, '').replace(/_/g, ' ');
+    var op = document.createElement('option');
+    op.value = String(i);
+    op.textContent = titulo.charAt(0).toUpperCase() + titulo.slice(1);
+    el.exemplos.appendChild(op);
+  });
+
+  el.exemplos.addEventListener('change', function () {
+    var ex = P.EXEMPLOS[Number(el.exemplos.value)];
+    el.exemplos.value = '';
+    if (!ex || !confirmarSubstituicao()) return;
+    nomeArquivo = ex.arquivo;
+    definirCodigo(ex.codigo);
+    limparSaida();
+    definirEstado('pronto');
+    el.editor.focus({ preventScroll: true });
+  });
+
+  el.abrir.addEventListener('click', function () { el.arquivo.click(); });
+  el.arquivo.addEventListener('change', function () {
+    var f = el.arquivo.files && el.arquivo.files[0];
+    el.arquivo.value = '';
+    if (!f || !confirmarSubstituicao()) return;
+    var leitor = new FileReader();
+    leitor.onload = function () {
+      nomeArquivo = f.name;
+      definirCodigo(String(leitor.result));
+      limparSaida();
+      definirEstado('pronto');
+    };
+    leitor.readAsText(f, 'utf-8');
+  });
+
+  el.baixar.addEventListener('click', function () {
+    var blob = new Blob([el.editor.value], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = /\.(alg|txt|md)$/i.test(nomeArquivo) ? nomeArquivo : 'programa.alg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  /* ---------------- início ---------------- */
+
+  var guardado = lerLocal();
+  definirCodigo(guardado !== null && guardado.trim() ? guardado : INICIAL);
+  definirEstado('pronto');
+  aoMudarExecucao();
+})();
+</script>
+</body>
+</html>
