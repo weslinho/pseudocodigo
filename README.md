@@ -1,11 +1,14 @@
 # Pseudocódigo JS
 
-Interpretador de **pseudocódigo em português (portugol)** feito em Node.js, para ensinar lógica de programação.
-O aluno escreve o algoritmo em um arquivo de texto, roda o sistema e o programa executa direto no terminal,
-com `LEIA` interativo (como o `input()` do Python). Não há dependências: só Node.js 18+.
+Interpretador de **pseudocódigo em português (portugol)** feito em Node.js para ensinar lógica de programação.
+O aluno escreve o algoritmo e o programa executa direto no terminal,
+com `LEIA` interativo (como o `input()` do Python). Não há dependências: só [Node.js 18+](https://nodejs.org/pt-br/download).
 
-## Como usar
+## Como usar 
 
+Para utilizar a última versão do interpretador de forma fácil e rápida, acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/).
+
+Agora, caso queira baixar o código-fonte e testar no seu próprio sistema:
 ```bash
 npm start                                 # executa o arquivo programa.alg
 npm start -- exemplos/03_escolha_mes.alg  # executa outro arquivo
@@ -14,12 +17,11 @@ node bin/pseudo.js --verificar prog.alg   # só confere erros, sem executar
 npm test                                  # testes automatizados
 ```
 
-O fluxo do aluno: editar `programa.alg` → salvar → rodar. A conversão acontece por dentro; o aluno só vê
-a execução e as mensagens de erro (com a linha e a posição do problema).
+O fluxo do aluno é: editar `programa.alg` → salvar → rodar.
 
-> Caso esteja utilizando Visual Studio Code, o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o arquivo do algoritmo aberto, para executar o arquivo.
+> Caso esteja utilizando Visual Studio Code, o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o arquivo do algoritmo aberto, para executar.
 
-## Versão WEB
+## Estrutura da versão WEB
 
 A pasta `docs/` é uma página que executa o mesmo interpretador no navegador: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador. Funciona também offline: basta abrir `docs/index.html`.
 
@@ -27,7 +29,7 @@ A pasta `docs/` é uma página que executa o mesmo interpretador no navegador: e
 npm run build:web     # gera docs/pseudo.js a partir de src/ e exemplos/
 ```
 
-Rode esse comando sempre que mudar algo em `src/` ou em `exemplos/`, e envie `docs/pseudo.js` junto no commit (é o arquivo que a página usa).
+Esse comando deve ser executado sempre que algo for alterado em `src/` ou em `exemplos/`. Ele gera o arquivo `docs/pseudo.js`, que é o interpretador em um único arquivo, necessário caso queira subir sua própria versão 
 
 Para publicar no **GitHub Pages**: *Settings → Pages → Build and deployment → Deploy from a branch → `main` / `/docs`*. O endereço fica `https://<usuario>.github.io/pseudocodigo/`.
 
