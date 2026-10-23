@@ -23,17 +23,11 @@ O fluxo do aluno é: editar `programa.alg` → salvar → rodar.
 
 ## Estrutura da versão WEB
 
-A pasta `docs/` é uma página que executa o mesmo interpretador no navegador: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador. Funciona também offline: basta abrir `docs/index.html`.
+A pasta `docs/` é uma página que executa o mesmo interpretador no navegador: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador.
 
-```
-npm run build:web     # gera docs/pseudo.js a partir de src/ e exemplos/
-```
+Para publicar no **GitHub Pages**: *Settings → Pages → Build and deployment → GitHub Actions*.
 
-Esse comando deve ser executado sempre que algo for alterado em `src/` ou em `exemplos/`. Ele gera o arquivo `docs/pseudo.js`, que é o interpretador em um único arquivo, necessário caso queira subir sua própria versão 
-
-Para publicar no **GitHub Pages**: *Settings → Pages → Build and deployment → Deploy from a branch → `main` / `/docs`*. O endereço fica `https://<usuario>.github.io/pseudocodigo/`.
-
-Regras para a versão web continuar funcionando: os módulos de `src/` (exceto `src/io.js`) não podem usar módulos do Node (`fs`, `readline`, `process`...); o `build:web` avisa se isso acontecer. A entrada/saída do terminal fica em `src/io.js` e a da página em `docs/index.html`. O limite de repetições na página é menor que o do terminal para detectar laços infinitos mais rápido.
+Regras para a versão web funcionar: os módulos de `src/` (exceto `src/io.js`) não podem usar módulos do Node (`fs`, `readline`, `process`...); o `build:web` avisa se isso acontecer. A entrada/saída do terminal fica em `src/io.js` e a da página em `docs/index.html`. O limite de repetições na página é menor que o do terminal para detectar laços infinitos mais rápido.
 
 ## Estrutura
 
