@@ -17,7 +17,7 @@ npm test                                  # testes automatizados
 O fluxo do aluno: editar `programa.alg` → salvar → rodar. A conversão acontece por dentro; o aluno só vê
 a execução e as mensagens de erro (com a linha e a posição do problema).
 
-> Caso esteja utilizando Visual Studio Code o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o `programa.alg` aberto, para executar o arquivo.
+> Caso esteja utilizando Visual Studio Code, o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o arquivo do algoritmo aberto, para executar o arquivo.
 
 ## Versão WEB
 
