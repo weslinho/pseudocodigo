@@ -254,8 +254,8 @@ class Parser {
         casos.push({ valores, corpo: this.comandos(FECHAMENTO_CASO) });
       } else if (this.ehKW('OUTROCASO', 'PADRAO', 'SENAO')) {
         if (padrao !== null) throw this.erro('O ESCOLHA só pode ter um caso padrão (OUTROCASO).');
-        this.avancar();
-        if (this.ehOp(':')) this.avancar();
+        const tkPadrao = this.avancar();
+        this.esperarOp(':', `depois do ${tkPadrao.raw}`);
         padrao = this.comandos(FECHAMENTO_CASO);
       } else break;
     }
