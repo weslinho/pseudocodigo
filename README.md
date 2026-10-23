@@ -14,8 +14,24 @@ node bin/pseudo.js --verificar prog.alg   # só confere erros, sem executar
 npm test                                  # testes automatizados
 ```
 
-O fluxo do aluno: editar `programa.alg` → salvar → `npm start`. A conversão acontece por dentro; o aluno só vê
+O fluxo do aluno: editar `programa.alg` → salvar → rodar. A conversão acontece por dentro; o aluno só vê
 a execução e as mensagens de erro (com a linha e a posição do problema).
+
+> Caso esteja utilizando Visual Studio Code o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o `programa.alg` aberto, para executar o arquivo.
+
+## Versão WEB
+
+A pasta `docs/` é uma página que executa o mesmo interpretador no navegador: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador. Funciona também offline: basta abrir `docs/index.html`.
+
+```
+npm run build:web     # gera docs/pseudo.js a partir de src/ e exemplos/
+```
+
+Rode esse comando sempre que mudar algo em `src/` ou em `exemplos/`, e envie `docs/pseudo.js` junto no commit (é o arquivo que a página usa).
+
+Para publicar no **GitHub Pages**: *Settings → Pages → Build and deployment → Deploy from a branch → `main` / `/docs`*. O endereço fica `https://<usuario>.github.io/pseudocodigo/`.
+
+Regras para a versão web continuar funcionando: os módulos de `src/` (exceto `src/io.js`) não podem usar módulos do Node (`fs`, `readline`, `process`...); o `build:web` avisa se isso acontecer. A entrada/saída do terminal fica em `src/io.js` e a da página em `docs/index.html`. O limite de repetições na página é menor que o do terminal para detectar laços infinitos mais rápido.
 
 ## Estrutura
 

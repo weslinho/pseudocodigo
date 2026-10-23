@@ -4,18 +4,34 @@ const { PseudoError } = require('./erros');
 const { TIPOS_INFO, formatar, nomeTipoValor } = require('./tipos');
 const { buscarFuncao } = require('./funcoes');
 
-const cederVez = () => new Promise((r) => setImmediate(r)); // deixa o Ctrl+C funcionar em laços longos
+// Devolve o controle ao ambiente de vez em quando em laços longos: no Node isso deixa o Ctrl+C
+// funcionar; no navegador deixa a página responder (botão "Parar"). Como o navegador não tem
+// setImmediate, usa-se MessageChannel (rápido); setTimeout é o último recurso.
+const cederVez = (() => {
+  if (typeof setImmediate === 'function') return () => new Promise((r) => setImmediate(r));
+  if (typeof MessageChannel === 'function') {
+    const canal = new MessageChannel();
+    const fila = [];
+    canal.port1.onmessage = () => fila.shift()();
+    return () => new Promise((r) => { fila.push(r); canal.port2.postMessage(null); });
+  }
+  return () => new Promise((r) => setTimeout(r, 0));
+})();
 
 class Interpretador {
   /**
    * @param programa  AST já verificada
    * @param io        { escrever(texto), lerLinha(): Promise<string|null> }
-   * @param opcoes    { maxIteracoes } (0 = sem limite)
+   * @param opcoes    { maxIteracoes, sinal }
+   *                  maxIteracoes: limite de repetições (0 = sem limite)
+   *                  sinal: AbortSignal opcional; ao ser acionado, o programa para na próxima repetição
+   *                         (usado pelo botão "Parar" da versão web)
    */
   constructor(programa, io, opcoes = {}) {
     this.programa = programa;
     this.io = io;
     this.maxIteracoes = opcoes.maxIteracoes ?? 10_000_000;
+    this.sinal = opcoes.sinal;
     this.iteracoes = 0;
     this.vars = new Map();
     for (const d of programa.decls) {
@@ -30,6 +46,9 @@ class Interpretador {
   async bloco(lista) { for (const c of lista) await this.comando(c); }
 
   async repeticao(no) {
+    if (this.sinal?.aborted) {
+      throw new PseudoError('Execução interrompida', 'O programa foi interrompido antes de terminar.', no?.linha, no?.col);
+    }
     this.iteracoes++;
     if (this.maxIteracoes > 0 && this.iteracoes > this.maxIteracoes) {
       throw this.erro(`O programa passou de ${this.maxIteracoes} repetições. Parece haver um laço infinito: a condição nunca muda?`, no);

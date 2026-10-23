@@ -201,3 +201,11 @@ test('limite de iterações detecta laço infinito', async () => {
 test('LEIA sem entrada disponível gera erro claro', async () => {
   assert.match((await falha(prog('DECLARE A : INTEIRO;', 'LEIA(A);'))).message, /entrada terminou/);
 });
+
+test('sinal de cancelamento interrompe um laço infinito', async () => {
+  const src = prog('DECLARE I : INTEIRO;', 'I <- 1; ENQUANTO(I > 0) FACA I <- 1; FIMENQUANTO');
+  const controlador = new AbortController();
+  setTimeout(() => controlador.abort(), 30);
+  const e = await falha(src, [], { maxIteracoes: 0, sinal: controlador.signal });
+  assert.strictEqual(e.tipo, 'Execução interrompida');
+});

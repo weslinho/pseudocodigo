@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node bin/pseudo.js",
     "verificar": "node bin/pseudo.js --verificar",
-    "test": "node --test test/interpretador.test.js"
+    "test": "node --test test/interpretador.test.js",
+    "build:web": "node scripts/build-web.js"
   },
   "engines": { "node": ">=18" },
   "license": "MIT"
