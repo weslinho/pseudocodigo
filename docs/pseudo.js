@@ -363,7 +363,6 @@ class Interpretador {
 }
 
 module.exports = { Interpretador };
-
 },
 "./lexer": function (module, exports, require) {
 'use strict';
@@ -741,7 +740,9 @@ class Parser {
     ramo();
     while (this.ehKW('SENAO')) {
       const tkSenao = this.avancar();
+
       if (this.ehKW('SE') && this.atual.linha === tkSenao.linha) { this.avancar(); ramo(); continue; }
+      
       senao = this.comandos(['FIMSE']);
       break;
     }
@@ -771,8 +772,8 @@ class Parser {
         casos.push({ valores, corpo: this.comandos(FECHAMENTO_CASO) });
       } else if (this.ehKW('OUTROCASO', 'PADRAO', 'SENAO')) {
         if (padrao !== null) throw this.erro('O ESCOLHA só pode ter um caso padrão (OUTROCASO).');
-        this.avancar();
-        if (this.ehOp(':')) this.avancar();
+        const tkPadrao = this.avancar();
+        this.esperarOp(':', `depois do ${tkPadrao.raw}`);
         padrao = this.comandos(FECHAMENTO_CASO);
       } else break;
     }
@@ -1209,6 +1210,34 @@ globalThis.Pseudo = {
   {
     "arquivo": "08_tipos_e_funcoes.alg",
     "codigo": "ALGORITMO TIPOS_E_FUNCOES:\n    DECLARE NOME : CARACTERES;\n    DECLARE IDADE : INTEIRO;\n    DECLARE ALTURA : NUMERICO;\n    DECLARE CODIGO : ALFANUMERICOS;\n    DECLARE MAIOR_IDADE : LOGICOS;\nINICIO\n    ESCREVA(\"Nome:\");\n    LEIA(NOME);\n    ESCREVA(\"Idade:\");\n    LEIA(IDADE);\n    ESCREVA(\"Altura (m):\");\n    LEIA(ALTURA);\n\n    MAIOR_IDADE <- IDADE >= 18;\n    CODIGO <- MAIUSCULO(SUBTEXTO(NOME, 1, 3)) + PARA_TEXTO(IDADE);\n\n    ESCREVA(\"Olá,\", NOME);\n    ESCREVA(\"Maior de idade?\", MAIOR_IDADE);\n    ESCREVA(\"Seu código:\", CODIGO);\n    ESCREVA(\"Altura arredondada:\", ROUND(ALTURA, 1));\n    ESCREVA(\"Resto de IDADE por 7:\", IDADE MOD 7, \"| divisão inteira:\", IDADE DIV 7);\n\n    SE(NAO MAIOR_IDADE E ALTURA > 1.5) ENTAO\n        ESCREVA(\"Menor de idade, mas já é alto(a)!\");\n    FIMSE\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "09_primos_e_fatorial.alg",
+    "codigo": "ALGORITMO PRIMOS_E_FATORIAL:\n    DECLARE N, I, D, QTD, FAT, CONT : INTEIRO;\n    DECLARE PRIMO : LOGICOS;\nINICIO\n    ESCREVA(\"Quantos números testar (a partir de 2)?\");\n    LEIA(N);\n\n    QTD <- 0;\n    PARA I DE 2 ATE N FACA\n        PRIMO <- VERDADEIRO;\n        D <- 2;\n        ENQUANTO(D * D <= I E PRIMO) FACA\n            SE(I MOD D = 0) ENTAO\n                PRIMO <- FALSO;\n            FIMSE\n            D++;\n        FIMENQUANTO\n        SE(PRIMO) ENTAO\n            ESCREVA(I, \"é primo\");\n            QTD += 1;\n        FIMSE\n    FIMPARA\n    ESCREVA(\"Total de primos até\", N, \":\", QTD);\n\n    FAT <- 1;\n    PARA CONT DE N ATE 2 PASSO -1 FACA\n        FAT *= CONT;\n    FIMPARA\n    ESCREVA(\"Fatorial de\", N, \"=\", FAT);\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "10_caixa_eletronico.alg",
+    "codigo": "ALGORITMO CAIXA_ELETRONICO:\n    DECLARE VALOR, RESTO, NOTAS : INTEIRO;\n    DECLARE NOTA : INTEIRO;\nINICIO\n    ESCREVA(\"Valor do saque (múltiplo de 10):\");\n    LEIA(VALOR);\n\n    SE(VALOR <= 0 OU VALOR MOD 10 <> 0) ENTAO\n        ESCREVA(\"Valor inválido\");\n    SENAO\n        RESTO <- VALOR;\n        NOTA <- 100;\n        REPITA\n            NOTAS <- RESTO DIV NOTA;\n            SE(NOTAS > 0) ENTAO\n                ESCREVA(NOTAS, \"nota(s) de R$\", NOTA);\n                RESTO <- RESTO MOD NOTA;\n            FIMSE\n            ESCOLHA(NOTA)\n                CASO 100: NOTA <- 50;\n                CASO 50: NOTA <- 20;\n                CASO 20: NOTA <- 10;\n                OUTROCASO: NOTA <- 0;\n            FIMESCOLHA\n        ATE(RESTO = 0 OU NOTA = 0);\n    FIMSE\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "11_media_notas.alg",
+    "codigo": "ALGORITMO MEDIA_NOTAS:\n    DECLARE ALUNO : CARACTERES;\n    DECLARE QTD, I : INTEIRO;\n    DECLARE NOTA, SOMA, MEDIA, MAIOR, MENOR : NUMERICO;\n    DECLARE APROVADO : LOGICOS;\nINICIO\n    ESCREVA(\"Nome do aluno:\");\n    LEIA(ALUNO);\n    ESCREVA(\"Quantas notas?\");\n    LEIA(QTD);\n\n    SOMA <- 0;\n    MAIOR <- 0;\n    MENOR <- 10;\n    PARA I DE 1 ATE QTD FACA\n        ESCREVA(\"Nota\", I, \":\");\n        LEIA(NOTA);\n        SE(NOTA < 0 OU NOTA > 10) ENTAO\n            ESCREVA(\"Nota inválida, será ignorada\");\n            I--;\n        SENAO\n            SOMA += NOTA;\n            MAIOR <- MAX(MAIOR, NOTA);\n            MENOR <- MIN(MENOR, NOTA);\n        FIMSE\n    FIMPARA\n\n    MEDIA <- SOMA / QTD;\n    APROVADO <- MEDIA >= 7;\n    ESCREVA(\"Aluno:\", MAIUSCULO(ALUNO));\n    ESCREVA(\"Média:\", ROUND(MEDIA, 2));\n    ESCREVA(\"Maior:\", MAIOR, \"| Menor:\", MENOR);\n    SE(APROVADO) ENTAO\n        ESCREVA(\"Situação: APROVADO\");\n    SENAO SE(MEDIA >= 5) ENTAO\n        ESCREVA(\"Situação: RECUPERAÇÃO\");\n    SENAO\n        ESCREVA(\"Situação: REPROVADO\");\n    FIMSE\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "12_texto_palindromo.alg",
+    "codigo": "ALGORITMO TEXTO_PALINDROMO:\n    DECLARE FRASE, LIMPA, INVERSA, LETRA : CARACTERES;\n    DECLARE I, VOGAIS : INTEIRO;\nINICIO\n    ESCREVA(\"Digite uma palavra:\");\n    LEIA(FRASE);\n\n    LIMPA <- MINUSCULO(FRASE);\n    INVERSA <- \"\";\n    VOGAIS <- 0;\n    PARA I DE 1 ATE TAM_TEXTO(LIMPA) FACA\n        LETRA <- SUBTEXTO(LIMPA, I, 1);\n        INVERSA <- LETRA + INVERSA;\n        SE(LOCALIZAR(LETRA, \"aeiou\") > 0) ENTAO\n            VOGAIS++;\n        FIMSE\n    FIMPARA\n\n    ESCREVA(\"Tamanho:\", TAM_TEXTO(FRASE));\n    ESCREVA(\"Invertida:\", INVERSA);\n    ESCREVA(\"Vogais:\", VOGAIS);\n    SE(LIMPA = INVERSA) ENTAO\n        ESCREVA(\"É um palíndromo!\");\n    SENAO\n        ESCREVA(\"Não é um palíndromo.\");\n    FIMSE\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "13_fibonacci_mdc.alg",
+    "codigo": "ALGORITMO FIBONACCI_MDC:\n    DECLARE A, B, X, Y, T, I, N, PROX, ANT, ATUAL : INTEIRO;\nINICIO\n    ESCREVA(\"Dois números para o MDC:\");\n    LEIA(A, B);\n    X <- A;\n    Y <- B;\n    ENQUANTO(Y <> 0) FACA\n        T <- Y;\n        Y <- X MOD Y;\n        X <- T;\n    FIMENQUANTO\n    ESCREVA(\"MDC de\", A, \"e\", B, \"=\", X);\n    ESCREVA(\"MMC =\", A * B DIV X);\n\n    ESCREVA(\"Quantos termos de Fibonacci?\");\n    LEIA(N);\n    ANT <- 0;\n    ATUAL <- 1;\n    PARA I DE 1 ATE N FACA\n        ESCREVA(\"F(\" + PARA_TEXTO(I) + \") =\", ANT);\n        PROX <- ANT + ATUAL;\n        ANT <- ATUAL;\n        ATUAL <- PROX;\n    FIMPARA\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "14_triangulo_e_geometria.alg",
+    "codigo": "ALGORITMO TRIANGULO_E_GEOMETRIA:\n    DECLARE A, B, C, S, AREA, ANGULO : NUMERICO;\n    DECLARE TIPO : CARACTERES;\n    DECLARE VALIDO, EQUI, ISO : LOGICOS;\nINICIO\n    ESCREVA(\"Lados do triângulo:\");\n    LEIA(A, B, C);\n\n    VALIDO <- A + B > C E A + C > B E B + C > A E A > 0 E B > 0 E C > 0;\n    SE(NAO VALIDO) ENTAO\n        ESCREVA(\"Esses lados não formam um triângulo.\");\n    SENAO\n        EQUI <- A = B E B = C;\n        ISO <- A = B OU B = C OU A = C;\n        SE(EQUI) ENTAO\n            TIPO <- \"equilátero\";\n        SENAO SE(ISO) ENTAO\n            TIPO <- \"isósceles\";\n        SENAO\n            TIPO <- \"escaleno\";\n        FIMSE\n        S <- (A + B + C) / 2;\n        AREA <- SQRT(S * (S - A) * (S - B) * (S - C));\n        ANGULO <- GRAUS(ACOS((B ^ 2 + C ^ 2 - A ^ 2) / (2 * B * C)));\n        ESCREVA(\"Tipo:\", TIPO);\n        ESCREVA(\"Perímetro:\", A + B + C);\n        ESCREVA(\"Área:\", ROUND(AREA, 3));\n        ESCREVA(\"Ângulo oposto ao lado A:\", ROUND(ANGULO, 2), \"graus\");\n        ESCREVA(\"Círculo de raio\", A, \"tem área\", ROUND(PI * A ^ 2, 2));\n    FIMSE\nFIMALGORITMO\n"
+  },
+  {
+    "arquivo": "15_menu_calculadora.alg",
+    "codigo": "ALGORITMO MENU_CALCULADORA:\n    DECLARE OP : INTEIRO;\n    DECLARE X, Y, R : NUMERICO;\n    DECLARE CONTINUAR : LOGICOS;\n    DECLARE USOS : INTEIRO;\nINICIO\n    USOS <- 0;\n    REPITA\n        ESCREVA(\"1-Somar 2-Subtrair 3-Multiplicar 4-Dividir 5-Potência 0-Sair\");\n        LEIA(OP);\n        CONTINUAR <- OP <> 0;\n        SE(OP >= 1 E OP <= 5) ENTAO\n            ESCREVA(\"Dois valores:\");\n            LEIA(X, Y);\n            USOS++;\n            ESCOLHA(OP)\n                CASO 1: R <- X + Y;\n                CASO 2: R <- X - Y;\n                CASO 3: R <- X * Y;\n                CASO 4:\n                    SE(Y = 0) ENTAO\n                        ESCREVA(\"Divisão por zero!\");\n                        R <- 0;\n                    SENAO\n                        R <- X / Y;\n                    FIMSE\n                CASO 5: R <- X ^ Y;\n            FIMESCOLHA\n            ESCREVA(\"Resultado:\", R);\n        SENAO SE(OP <> 0) ENTAO\n            ESCREVA(\"Opção inválida\");\n        FIMSE\n    ATE(NAO CONTINUAR);\n    ESCREVA(\"Operações realizadas:\", USOS);\nFIMALGORITMO\n"
   }
 ]
 };

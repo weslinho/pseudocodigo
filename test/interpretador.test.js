@@ -73,6 +73,16 @@ test('ESCOLHA com valores, listas e faixas (1..5)', async () => {
   assert.strictEqual(await rodar(src, [6]), 'padrao\n');
 });
 
+test('OUTROCASO sem dois pontos é erro de sintaxe', async () => {
+  const src = prog('DECLARE M : INTEIRO;', `LEIA(M);
+    ESCOLHA(M)
+      CASO 1: ESCREVA("um");
+      OUTROCASO ESCREVA("padrao");
+    FIMESCOLHA`);
+  const e = await falha(src, [1]);
+  assert.match(e.message, /Esperava ':' depois do OUTROCASO/);
+});
+
 test('ENQUANTO com INICIO/FIM e i++', async () => {
   const src = prog('DECLARE i : INTEIRO;', `i <- 1;
     ENQUANTO(i <= 3) FACA
@@ -208,4 +218,50 @@ test('sinal de cancelamento interrompe um laço infinito', async () => {
   setTimeout(() => controlador.abort(), 30);
   const e = await falha(src, [], { maxIteracoes: 0, sinal: controlador.signal });
   assert.strictEqual(e.tipo, 'Execução interrompida');
+});
+// ---- Exemplos complexos (exemplos/09 a 15): saídas conferidas à mão ----
+const fs = require('node:fs');
+const path = require('node:path');
+const exemplo = (nome) => fs.readFileSync(path.join(__dirname, '..', 'exemplos', nome), 'utf8');
+
+test('exemplo 09: primos e fatorial', async () => {
+  const s = await rodar(exemplo('09_primos_e_fatorial.alg'), [20]);
+  assert.match(s, /19 é primo\nTotal de primos até 20 : 8\nFatorial de 20 = 2432902008176640000\n$/);
+});
+
+test('exemplo 10: caixa eletrônico', async () => {
+  const s = await rodar(exemplo('10_caixa_eletronico.alg'), [380]);
+  assert.match(s, /3 nota\(s\) de R\$ 100\n1 nota\(s\) de R\$ 50\n1 nota\(s\) de R\$ 20\n1 nota\(s\) de R\$ 10\n$/);
+  assert.match(await rodar(exemplo('10_caixa_eletronico.alg'), [35]), /Valor inválido\n$/);
+});
+
+test('exemplo 11: média com nota inválida repetida (I-- dentro do PARA)', async () => {
+  const s = await rodar(exemplo('11_media_notas.alg'), ['Ana', 3, 8, 11, 6.5, 9]);
+  assert.match(s, /Aluno: ANA\nMédia: 7.83\nMaior: 9 \| Menor: 6.5\nSituação: APROVADO\n$/);
+});
+
+test('exemplo 12: palíndromo', async () => {
+  assert.match(await rodar(exemplo('12_texto_palindromo.alg'), ['Arara']), /Vogais: 3\nÉ um palíndromo!\n$/);
+  assert.match(await rodar(exemplo('12_texto_palindromo.alg'), ['casa']), /Não é um palíndromo\.\n$/);
+});
+
+test('exemplo 13: MDC, MMC e Fibonacci', async () => {
+  const s = await rodar(exemplo('13_fibonacci_mdc.alg'), [48, 18, 10]);
+  assert.match(s, /MDC de 48 e 18 = 6\nMMC = 144\n/);
+  assert.match(s, /F\(10\) = 34\n$/);
+});
+
+test('exemplo 14: triângulo', async () => {
+  const s = await rodar(exemplo('14_triangulo_e_geometria.alg'), [3, 4, 5]);
+  assert.match(s, /Tipo: escaleno\nPerímetro: 12\nÁrea: 6\nÂngulo oposto ao lado A: 36.87 graus\n/);
+  assert.match(await rodar(exemplo('14_triangulo_e_geometria.alg'), [1, 2, 9]), /não formam um triângulo/);
+});
+
+test('exemplo 15: menu com ESCOLHA dentro de REPITA', async () => {
+  const s = await rodar(exemplo('15_menu_calculadora.alg'), [1, 2, 3, 4, 5, 0, 9, 5, 2, 10, 0]);
+  assert.match(s, /Resultado: 5\n/);
+  assert.match(s, /Divisão por zero!/);
+  assert.match(s, /Opção inválida/);
+  assert.match(s, /Resultado: 1024\n/);
+  assert.match(s, /Operações realizadas: 3\n$/);
 });
