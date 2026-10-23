@@ -425,6 +425,25 @@ button.principal:hover:not(:disabled) { filter: brightness(1.08); border-color: 
       else inserir('    ');
       return;
     }
+
+    if (e.key === 'Backspace' && e.ctrlKey && !e.altKey && !e.metaKey) {
+      // Ctrl+Backspace sobre o recuo: apaga só até 4 espaços, sem juntar com a linha de cima.
+      var t = el.editor, p0 = t.selectionStart;
+      if (p0 === t.selectionEnd) {
+        var ls = t.value.lastIndexOf('\n', p0 - 1) + 1;
+        var antes = t.value.slice(ls, p0);
+        if (antes && /^ +$/.test(antes)) {
+          e.preventDefault();
+          t.setSelectionRange(p0 - Math.min(4, antes.length), p0);
+          if (!document.execCommand('delete')) {
+            t.setRangeText('', t.selectionStart, t.selectionEnd, 'end');
+            t.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          return;
+        }
+      }
+    }
+
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
       var v = el.editor.value, pos = el.editor.selectionStart;
       var ini = v.lastIndexOf('\n', pos - 1) + 1;
