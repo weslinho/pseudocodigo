@@ -222,7 +222,11 @@ class Parser {
     ramo();
     while (this.ehKW('SENAO')) {
       const tkSenao = this.avancar();
+<<<<<<< HEAD
       if (this.ehKW('SE') && this.atual.linha === tkSenao.linha) { this.avancar(); ramo(); continue; }
+=======
+      if (this.ehKW('SE') && this.atual.linha === tkSenao.linha) { this.avancar(); ramo(); continue; } // SENAO SE = else if
+>>>>>>> c5dcf51461a9b3af81b346454b75c6404bf19d2d
       senao = this.comandos(['FIMSE']);
       break;
     }
