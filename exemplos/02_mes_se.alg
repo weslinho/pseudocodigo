@@ -1,4 +1,4 @@
-ALGORITMO_MES:
+ALGORITMO _MES:
     DECLARE MES : INTEIRO;
 INICIO
     ESCREVA("Digite qual o número do mês");
