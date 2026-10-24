@@ -1,7 +1,36 @@
-# Pseudocódigo JS
+<div align="center">
+
+# Pseudocódigo > JS
+
+[![Abrir no navegador](https://img.shields.io/badge/%F0%9F%8C%90%20Abrir%20no%20navegador-1f4fd8?style=for-the-badge)](https://wsleyweber.github.io/pseudocodigo/)
+
+![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2f9e44?style=flat-square)
+![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)
+![Portugol](https://img.shields.io/badge/portugol-pseudoc%C3%B3digo-862e9c?style=flat-square)
+
+</div>
 
 Interpretador de **pseudocódigo em português (portugol)** para ensinar lógica de programação.
 Você escreve o algoritmo e executa no navegador ou no terminal, com `LEIA` interativo (como o `input()` do Python).
+
+<details>
+<summary><b>📑 Neste documento</b></summary>
+
+- 🚀 [Como usar](#como-usar)
+- 💻 [Usar no terminal (Visual Studio Code)](#usar-no-terminal-visual-studio-code)
+  - [Opções](#opções)
+  - [Customizações (opcional)](#customizações-opcional)
+- 📘 [Resumo da linguagem](#resumo-da-linguagem)
+  - [Tipos](#tipos) · [Nomes de variáveis](#nomes-de-variáveis) · [Entrada e saída](#entrada-e-saída) · [Operadores](#operadores)
+  - [Estruturas](#estruturas) · [Vetores e matrizes](#vetores-e-matrizes) · [Constantes](#constantes)
+  - [Funções e procedimentos](#funções-e-procedimentos) · [Controle de laços](#controle-de-laços) · [Funções pré-definidas](#funções-pré-definidas)
+- ⚠️ [Avisos pedagógicos](#avisos-pedagógicos)
+- 🐞 [Erros que o usuário vê](#erros-que-o-usuário-vê)
+- 🤝 [Contribuir](#contribuir)
+
+</details>
+
+---
 
 ## Como usar
 
@@ -9,6 +38,8 @@ Você escreve o algoritmo e executa no navegador ou no terminal, com `LEIA` inte
 |---|---|
 | **Usar no navegador** | Acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/) |
 | **Usar no terminal / Visual Studio Code** | Baixe o `pseudo-cli.js` (veja abaixo). Precisa do [Node.js 18+](https://nodejs.org/pt-br/download) |
+
+---
 
 ## Usar no terminal (Visual Studio Code)
 
@@ -26,10 +57,10 @@ No Linux, Mac ou Git Bash:
 curl -O https://wsleyweber.github.io/pseudocodigo/pseudo-cli.js
 ```
 
-> O `irm` só existe no PowerShell (o terminal padrão do Visual Studio Code no Windows). No Prompt de Comando (`cmd`),
+> 💡 O `irm` só existe no PowerShell (o terminal padrão do Visual Studio Code no Windows). No Prompt de Comando (`cmd`),
 > abra o endereço acima no navegador e salve o arquivo na sua pasta com **Salvar como**.
 
-> **IMPORTANTE:** Se houver atualizações no interpretador é necessário repetir o passo 2 para baixar a nova versão (o arquivo antigo é substituído).
+> ⚠️ **IMPORTANTE:** Se houver atualizações no interpretador é necessário repetir o passo 2 para baixar a nova versão (o arquivo antigo é substituído).
 
 **3. Crie o seu algoritmo**, por exemplo `meualgoritmo.alg`, na mesma pasta, e escreva o código nele.
 
@@ -83,7 +114,9 @@ Permite ver as palavras reservadas, tipos e comentários coloridos nos arquivos 
 3. Clique nos três pontinhos (**...**) no topo do painel → **Instalar do VSIX...**
 4. Escolha o arquivo baixado e recarregue o VS Code, se pedir.
 
-> **IMPORTANTE:** Se houver atualizações na extensão é necessário baixar a nova versão e reinstalar.
+> ⚠️ **IMPORTANTE:** Se houver atualizações na extensão é necessário baixar a nova versão e reinstalar.
+
+---
 
 ## Resumo da linguagem
 
@@ -142,7 +175,7 @@ Em `LOGICOS` vale `verdadeiro/falso`, `v/f`, `sim/nao`.
 * Precedência (do menor para o maior): `OU` < `E` < `NAO` < relacionais < `+ -` < `* / DIV MOD` < `-` unário < `^`.
   Use parênteses na dúvida.
 
-> Atenção: `i<-1` é lido como atribuição. Para comparar com um negativo escreva `i < -1`.
+> ⚠️ Atenção: `i<-1` é lido como atribuição. Para comparar com um negativo escreva `i < -1`.
 
 ### Estruturas
 
@@ -233,12 +266,16 @@ Uso: `X <- FATORIAL(5);` (função, dentro de uma expressão) e `PREENCHER(V, 3)
 | Texto | `MAIUSCULO MINUSCULO TAM_TEXTO SUBTEXTO(t, inicio, qtd) LOCALIZAR(trecho, t)` (posições começam em 1) |
 | Conversão | `PARA_TEXTO(valor)`, `PARA_NUMERO(texto)` |
 
+---
+
 ## Avisos pedagógicos
 
 Antes de executar, o sistema mostra **avisos** (não impedem a execução; use `--sem-avisos` para esconder):
 variável declarada e nunca usada, variável usada mas que nunca recebe valor, comparação de números decimais com
 `=` (o clássico `0.1 + 0.2 = 0.3`), `/` atribuído a `INTEIRO`, divisão por zero literal e laço cuja condição
 nunca muda (possível laço infinito).
+
+---
 
 ## Erros que o usuário vê
 
@@ -254,6 +291,8 @@ Erros léxicos, de sintaxe e de tipo/declaração são encontrados **antes** de 
 trechos que não seriam executados. Erros de execução (divisão por zero, variável sem valor, `SQRT(-1)`...)
 aparecem quando acontecem. Um limite de repetições (padrão 10 milhões, `--max-iteracoes`) evita travar
 com laço infinito, e `Ctrl+C` interrompe a qualquer momento.
+
+---
 
 ## Contribuir
 
