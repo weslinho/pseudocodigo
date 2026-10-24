@@ -238,6 +238,7 @@ class Interpretador {
     if (this.profundidade >= this.maxProfundidade) {
       throw this.erro(`Chamadas demais uma dentro da outra (mais de ${this.maxProfundidade}). Falta a condição de parada da recursão?`, no);
     }
+    await this.repeticao(no); // conta a chamada como repetição: limite, botão Parar e "respiro" para o navegador
     const novo = new Map();
     for (let i = 0; i < def.params.length; i++) {
       const p = def.params[i];
@@ -360,7 +361,12 @@ class Interpretador {
       case '>': return a > b;
       case '<=': return a <= b;
       case '>=': return a >= b;
-      case '+': if (typeof a === 'string') return a + b; // texto + texto
+      case '+':
+        if (typeof a === 'string') { // texto + texto
+          const r = a + b;
+          if (r.length > 1000000) throw this.erro('O texto ficou grande demais (mais de 1.000.000 de caracteres).', no);
+          return r;
+        }
     }
     this.numero(no.esq, a); this.numero(no.dir, b);
     let r;
