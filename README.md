@@ -7,7 +7,7 @@ Você escreve o algoritmo e executa no navegador ou no terminal, com `LEIA` inte
 
 | Quero... | Faça isto |
 |---|---|
-| **Usar no navegador** (nada para instalar) | Acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/) |
+| **Usar no navegador** | Acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/) |
 | **Usar no terminal / Visual Studio Code** | Baixe o `pseudo-cli.js` (veja abaixo). Precisa do [Node.js 18+](https://nodejs.org/pt-br/download) |
 
 ## Usar no terminal (Visual Studio Code)
@@ -36,7 +36,7 @@ curl -O https://wsleyweber.github.io/pseudocodigo/pseudo-cli.js
 **4. Execute:**
 
 ```
-node pseudo-cli.js meu.alg
+node pseudo-cli.js meualgoritmo.alg
 ```
 
 Se aparecer `'node' não é reconhecido`, o Node.js não está instalado, ou o VS Code precisa ser fechado e
@@ -83,7 +83,7 @@ Permite ver as palavras reservadas, tipos e comentários coloridos nos arquivos 
 3. Clique nos três pontinhos (**...**) no topo do painel → **Instalar do VSIX...**
 4. Escolha o arquivo baixado e recarregue o VS Code, se pedir.
 
-Para atualizar, baixe a versão nova e instale por cima da anterior.
+> **IMPORTANTE:** Se houver atualizações na extensão é necessário baixar a nova versão e reinstalar.
 
 ## Resumo da linguagem
 
