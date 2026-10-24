@@ -1,23 +1,48 @@
 # Pseudocódigo JS
 
-Interpretador de **pseudocódigo em português (portugol)** feito em Node.js para ensinar lógica de programação.
-O usuário escreve o algoritmo e o programa executa direto no terminal,
-com `LEIA` interativo (como o `input()` do Python). Não há dependências: só [Node.js 18+](https://nodejs.org/pt-br/download).
+Interpretador de **pseudocódigo em português (portugol)** para ensinar lógica de programação.
+Você escreve o algoritmo e executa no navegador ou no terminal, com `LEIA` interativo (como o `input()` do Python).
 
-## Como usar 
+## Use agora
 
-Para utilizar a última versão do interpretador de forma fácil e rápida, acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/).
+| Quero... | Faça isto |
+|---|---|
+| **Usar no navegador** (nada para instalar) | Acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/) |
+| **Usar no terminal / Visual Studio Code** | Baixe o `pseudo-cli.js` (veja abaixo). Precisa do [Node.js 18+](https://nodejs.org/pt-br/download) |
 
-Agora, caso queira baixar o código-fonte e testar no seu próprio sistema:
-```bash
-npm start                                 # executa o arquivo programa.alg
-npm start -- exemplos/03_escolha_mes.alg  # executa outro arquivo
-node bin/pseudo.js meu_codigo.txt         # qualquer extensão serve (.alg, .txt, .md ...)
-node bin/pseudo.js --verificar prog.alg   # só confere erros e avisos, sem executar
-npm test                                  # testes automatizados
+## Usar no terminal (Visual Studio Code)
+
+**1. Crie uma pasta** para os seus algoritmos e abra-a no Visual Studio Code (*Arquivo → Abrir Pasta*).
+
+**2. Baixe o interpretador** uma única vez. Abra o terminal do Visual Studio Code (*Terminal → Novo Terminal*) e rode:
+
+```powershell
+irm https://wsleyweber.github.io/pseudocodigo/pseudo-cli.js -OutFile pseudo-cli.js
 ```
 
-Opções da linha de comando:
+No Linux, Mac ou Git Bash:
+
+```bash
+curl -O https://wsleyweber.github.io/pseudocodigo/pseudo-cli.js
+```
+
+> O `irm` só existe no PowerShell (o terminal padrão do Visual Studio Code no Windows). No Prompt de Comando (`cmd`),
+> abra o endereço acima no navegador e salve o arquivo na sua pasta com **Salvar como**.
+
+> **IMPORTANTE:** Se houver atualizações no interpretador é necessário repetir o passo 2 para baixar a nova versão (o arquivo antigo é substituído).
+
+**3. Crie o seu algoritmo**, por exemplo `meualgoritmo.alg`, na mesma pasta, e escreva o código nele.
+
+**4. Execute:**
+
+```
+node pseudo-cli.js meu.alg
+```
+
+Se aparecer `'node' não é reconhecido`, o Node.js não está instalado, ou o VS Code precisa ser fechado e
+aberto de novo depois da instalação.
+
+### Opções
 
 | Opção | O que faz |
 |---|---|
@@ -25,35 +50,40 @@ Opções da linha de comando:
 | `--sem-avisos` | Não mostra os avisos pedagógicos |
 | `--max-iteracoes <n>` | Limite de repetições contra laços infinitos (padrão 10000000; 0 = sem limite) |
 
-O fluxo é: editar `programa.alg` → salvar → rodar.
+Exemplo: `node pseudo-cli.js --verificar meu.alg`. Para interromper um programa a qualquer momento, use `Ctrl+C`.
 
-> Caso esteja utilizando Visual Studio Code, o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o arquivo do algoritmo aberto, para executar.
+### Customizações (opcional)
 
-## Sobre a estrutura da versão WEB
+Para melhor visualização e execução dos algoritmos, algumas customizações podem ser feitas pelo usuário:
 
-A pasta `docs/` é onde se encontra a página que executa o interpretador no navegador, contando com: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador.
+#### Atalho no Visual Studio Code
 
-Para publicar no **GitHub Pages**, foi utilizado o **GitHub Actions**. Com ele, sempre que o código principal é alterado, um fluxo converte o código para um formato que o navegador entende. O limite de repetições na página é menor que o do terminal para detectar laços infinitos mais rápido.
+Para facilitar e permitir executar o arquivo aberto com **Ctrl + Shift + B**, crie o arquivo `.vscode/tasks.json` na sua pasta e cole o bloco abaixo:
 
-## Estrutura do interpretador
-
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Executar algoritmo",
+      "type": "shell",
+      "command": "node pseudo-cli.js \"${file}\"",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared", "focus": true }
+    }
+  ]
+}
 ```
-programa.alg          arquivo executado por padrão
-bin/pseudo.js         linha de comando
-src/
-  lexer.js            texto -> tokens (comentários, números, palavras, operadores)
-  parser.js           tokens -> árvore do programa (sintaxe e precedência)
-  semantica.js        verificação ANTES de executar (declarações e tipos)
-  interpretador.js    execução da árvore
-  tipos.js            os 5 tipos: validação, conversão do LEIA, formatação do ESCREVA
-  funcoes.js          funções pré-definidas (SQRT, COS, ...). Fácil de estender
-  sugestoes.js        "Você quis dizer ...?" (distância entre palavras)
-  palavras.js         palavras reservadas
-  io.js               entrada/saída pelo terminal
-  erros.js            mensagens de erro amigáveis
-exemplos/             programas prontos
-test/                 testes (node:test)
-```
+
+#### Extensão para realçar sintaxe
+
+Permite ver as palavras reservadas, tipos e comentários coloridos nos arquivos `.alg`. Instale da seguinte forma:
+1. Baixe o arquivo **pseudocodigo.vsix** na [página de Releases](https://github.com/wsleyweber/pseudocodigo/releases/latest/download/pseudocodigo.vsix).
+2. No Visual Studio Code, abra a aba **Extensões** (`Ctrl + Shift + X`).
+3. Clique nos três pontinhos (**...**) no topo do painel → **Instalar do VSIX...**
+4. Escolha o arquivo baixado e recarregue o VS Code, se pedir.
+
+Para atualizar, baixe a versão nova e instale por cima da anterior.
 
 ## Resumo da linguagem
 
@@ -99,7 +129,7 @@ ESCREVA_SEM_QUEBRA("Digite: ");      # igual, mas NÃO pula linha (bom antes de 
 LEIA(X);                             # lê um valor; LEIA(A, B, C) lê um por linha; LEIA(V[2]) lê numa posição
 ```
 
-`LEIA` valida o tipo e pede de novo se o aluno digitar algo inválido. Em `NUMERICO` vale `3,5` ou `3.5`.
+`LEIA` valida o tipo e pede de novo se o usuário digitar algo inválido. Em `NUMERICO` vale `3,5` ou `3.5`.
 Em `LOGICOS` vale `verdadeiro/falso`, `v/f`, `sim/nao`.
 
 ### Operadores
@@ -138,6 +168,7 @@ ATE(cond);
 * `SENAO SE` continua o **mesmo** `SE` (um único `FIMSE` fecha tudo). Para aninhar um `SE` dentro de um
   `SENAO`, coloque-o em um bloco: `SENAO INICIO SE ... FIMSE FIM`.
 * No `ESCOLHA` não há "queda" entre casos: só o caso que combinou é executado.
+* Depois de `CASO` e de `OUTROCASO` os dois pontos (`:`) são obrigatórios.
 
 ### Vetores e matrizes
 
@@ -149,7 +180,7 @@ NOTAS[1] <- 8.5;
 M[2][3] <- NOTAS[1] * 2;                   # também vale M[2, 3]
 ```
 
-* As posições começam em **1** (para começar em 0, deve-se mudar `BASE_INDICE` em `src/tipos.js`).
+* As posições começam em **1**.
 * O tamanho deve ser fixo: um número ou uma `CONSTANTE` (nunca uma variável).
 * Ler uma posição que nunca recebeu valor, ou usar um índice fora dos limites, é erro de execução.
 
@@ -209,7 +240,7 @@ variável declarada e nunca usada, variável usada mas que nunca recebe valor, c
 `=` (o clássico `0.1 + 0.2 = 0.3`), `/` atribuído a `INTEIRO`, divisão por zero literal e laço cuja condição
 nunca muda (possível laço infinito).
 
-## Erros que o aluno vê
+## Erros que o usuário vê
 
 ```
 Erro de tipo/declaração (linha 4, coluna 3): A variável 'A' é do tipo INTEIRO e não aceita um valor texto.
@@ -223,3 +254,8 @@ Erros léxicos, de sintaxe e de tipo/declaração são encontrados **antes** de 
 trechos que não seriam executados. Erros de execução (divisão por zero, variável sem valor, `SQRT(-1)`...)
 aparecem quando acontecem. Um limite de repetições (padrão 10 milhões, `--max-iteracoes`) evita travar
 com laço infinito, e `Ctrl+C` interrompe a qualquer momento.
+
+## Contribuir
+
+O projeto é de código aberto (licença MIT). Quer entender como o interpretador funciona, corrigir algo ou
+sugerir uma melhoria? Veja o [CONTRIBUTE.md](CONTRIBUTE.md).
