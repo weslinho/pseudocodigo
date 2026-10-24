@@ -3,7 +3,7 @@
 Interpretador de **pseudocódigo em português (portugol)** para ensinar lógica de programação.
 Você escreve o algoritmo e executa no navegador ou no terminal, com `LEIA` interativo (como o `input()` do Python).
 
-## Use agora
+## Como usar
 
 | Quero... | Faça isto |
 |---|---|
