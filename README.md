@@ -139,7 +139,7 @@ ATE(cond);
 | Texto | `MAIUSCULO MINUSCULO TAM_TEXTO SUBTEXTO(t, inicio, qtd) LOCALIZAR(trecho, t)` (posições começam em 1) |
 | Conversão | `PARA_TEXTO(valor)`, `PARA_NUMERO(texto)` |
 
-## Erros que o aluno vê
+## Erros que o usuário vê
 
 ```
 Erro de tipo/declaração (linha 4, coluna 3): A variável 'A' é do tipo INTEIRO e não aceita um valor texto.
