@@ -1,14 +1,14 @@
 # Pseudocódigo JS
 
 Interpretador de **pseudocódigo em português (portugol)** feito em Node.js para ensinar lógica de programação.
-O aluno escreve o algoritmo e o programa executa direto no terminal,
+O usuário escreve o algoritmo e o programa executa direto no terminal,
 com `LEIA` interativo (como o `input()` do Python). Não há dependências: só [Node.js 18+](https://nodejs.org/pt-br/download).
 
 ## Como usar 
 
 Para utilizar a última versão do interpretador de forma fácil e rápida, acesse [wsleyweber.github.io/pseudocodigo](https://wsleyweber.github.io/pseudocodigo/).
 
-Agora, caso queira baixar o código-fonte e testar no seu próprio sistema:
+Agora, caso queira baixar o código-fonte e testar no seu próprio sistema, esses são os comandos definidos para usar via terminal:
 ```bash
 npm start                                 # executa o arquivo programa.alg
 npm start -- exemplos/03_escolha_mes.alg  # executa outro arquivo
@@ -17,19 +17,17 @@ node bin/pseudo.js --verificar prog.alg   # só confere erros, sem executar
 npm test                                  # testes automatizados
 ```
 
-O fluxo do aluno é: editar `programa.alg` → salvar → rodar.
+O fluxo é: editar `programa.alg` → salvar → rodar.
 
-> Caso esteja utilizando Visual Studio Code, o aluno pode pressionar as teclas **Ctrl + Shift + B**, com o arquivo do algoritmo aberto, para executar.
+> Caso esteja utilizando Visual Studio Code, pode-se pressionar as teclas **Ctrl + Shift + B**, com o arquivo do algoritmo aberto, para executar.
 
-## Estrutura da versão WEB
+## Sobre a estrutura da versão WEB
 
-A pasta `docs/` é uma página que executa o mesmo interpretador no navegador: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador.
+A pasta `docs/` é onde se encontra a página que executa o interpretador no navegador, contando com: editor com realce de sintaxe e numeração de linhas, `LEIA` interativo na própria página, botões **Executar**, **Parar** e **Verificar erros**, exemplos prontos, abrir/baixar arquivos `.alg` e salvamento automático no navegador.
 
-Para publicar no **GitHub Pages**: *Settings → Pages → Build and deployment → GitHub Actions*.
+Para publicar no **GitHub Pages**, foi utilizado o **GitHub Actions**. Com ele, sempre que o código principal é alterado, um fluxo converte o código para um formato que o navegador entende. O limite de repetições na página é menor que o do terminal para detectar laços infinitos mais rápido.
 
-Regras para a versão web funcionar: os módulos de `src/` (exceto `src/io.js`) não podem usar módulos do Node (`fs`, `readline`, `process`...); o `build:web` avisa se isso acontecer. A entrada/saída do terminal fica em `src/io.js` e a da página em `docs/index.html`. O limite de repetições na página é menor que o do terminal para detectar laços infinitos mais rápido.
-
-## Estrutura
+## Estrutura do interpretador
 
 ```
 programa.alg          arquivo executado por padrão
@@ -119,7 +117,7 @@ FIMSE                                     ...
 ENQUANTO(cond) FACA                       ...
     ...                           FIMESCOLHA
 FIMENQUANTO
-                                  PARA I DE 1 ATE 10 PASSO 2 FACA
+                                  PARA i DE 1 ATE 10 FACA
 REPITA                                ...
     ...                           FIMPARA
 ATE(cond);
@@ -153,10 +151,3 @@ Erros léxicos, de sintaxe e de tipo/declaração são encontrados **antes** de 
 trechos que não seriam executados. Erros de execução (divisão por zero, variável sem valor, `SQRT(-1)`...)
 aparecem quando acontecem. Um limite de repetições (padrão 10 milhões, `--max-iteracoes`) evita travar
 com laço infinito, e `Ctrl+C` interrompe a qualquer momento.
-
-## Decisões que você pode mudar
-
-* **`CARACTERES` x `ALFANUMERICOS`**: hoje os dois guardam texto livre. Para diferenciá-los
-  (ex.: `CARACTERES` = 1 caractere), edite `aceita` e `ler` em `src/tipos.js`.
-* **Novas funções**: acrescente uma entrada em `src/funcoes.js`; ela vira função e palavra reservada sozinha.
-* **Novas palavras reservadas**: `src/palavras.js`.
