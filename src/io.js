@@ -5,7 +5,7 @@ const readline = require('readline');
 /**
  * Entrada/saída pelo terminal. A leitura é "preguiçosa": só abre o stdin quando o
  * programa executa o primeiro LEIA. Funciona tanto digitando quanto com redirecionamento
- * (ex.: `echo 212 | node bin/pseudo.js`).
+ * (ex.: `echo 212 | node bin/pseudo.js`). Avisos vão para o stderr.
  */
 function criarIOTerminal() {
   let rl = null;
@@ -27,6 +27,7 @@ function criarIOTerminal() {
 
   return {
     escrever: (texto) => process.stdout.write(texto),
+    avisar: (texto) => process.stderr.write(texto),
     lerLinha: () => {
       abrir();
       if (fila.length) return Promise.resolve(fila.shift());

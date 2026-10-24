@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node bin/pseudo.js",
     "verificar": "node bin/pseudo.js --verificar",
-    "test": "node --test test/interpretador.test.js",
+    "test": "node --test test/interpretador.test.js test/recursos.test.js",
     "build:web": "node scripts/build-web.js",
     "build:cli": "node scripts/build-cli.js"
   },

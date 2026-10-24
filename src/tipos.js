@@ -48,6 +48,9 @@ const TIPOS_INFO = {
 
 const NOMES_TIPOS = Object.keys(TIPOS_INFO);
 
+/** Primeira posição de um VETOR/MATRIZ (1 = estilo portugol; troque para 0 se preferir estilo C). */
+const BASE_INDICE = 1;
+
 /** Como um valor é exibido por ESCREVA. */
 function formatar(valor) {
   if (typeof valor === 'boolean') return valor ? 'VERDADEIRO' : 'FALSO';
@@ -58,6 +61,12 @@ function formatar(valor) {
   return String(valor);
 }
 
+/** Número com quantidade fixa de casas decimais (usado por FORMATAR). */
+function formatarDecimais(valor, casas) {
+  const arredondado = Number(Math.round(Number(`${valor}e${casas}`)) + `e-${casas}`);
+  return (Number.isFinite(arredondado) ? arredondado : valor).toFixed(casas);
+}
+
 function nomeTipoValor(valor) {
   if (typeof valor === 'boolean') return 'LOGICOS';
   if (typeof valor === 'string') return 'texto';
@@ -66,4 +75,6 @@ function nomeTipoValor(valor) {
 
 const ROTULO_ESTATICO = { numero: 'número', texto: 'texto', logico: 'lógico' };
 
-module.exports = { TIPOS_INFO, NOMES_TIPOS, formatar, nomeTipoValor, ROTULO_ESTATICO };
+module.exports = {
+  TIPOS_INFO, NOMES_TIPOS, BASE_INDICE, formatar, formatarDecimais, nomeTipoValor, ROTULO_ESTATICO,
+};

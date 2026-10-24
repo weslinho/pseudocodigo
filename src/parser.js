@@ -2,6 +2,8 @@
 
 const { PseudoError } = require('./erros');
 const { NOMES_TIPOS } = require('./tipos');
+const { PALAVRAS_ESTRUTURA } = require('./palavras');
+const { sugerir } = require('./sugestoes');
 
 const OPS_RELACIONAIS = { '=': '=', '==': '=', '<>': '<>', '!=': '<>', '<': '<', '>': '>', '<=': '<=', '>=': '>=' };
 const FECHAMENTO_CASO = ['CASO', 'OUTROCASO', 'PADRAO', 'SENAO', 'FIMESCOLHA'];
@@ -34,7 +36,9 @@ class Parser {
 
   esperarKW(valor, contexto = '') {
     if (!this.ehKW(valor)) {
-      throw this.erro(`Esperava ${valor}${contexto ? ' ' + contexto : ''}, mas encontrei ${this.descrever(this.atual)}.`);
+      const a = this.atual;
+      const dica = a.tipo === 'ID' && sugerir(a.raw, [valor]) ? ` Você quis dizer ${valor}?` : '';
+      throw this.erro(`Esperava ${valor}${contexto ? ' ' + contexto : ''}, mas encontrei ${this.descrever(a)}.${dica}`);
     }
     return this.avancar();
   }
@@ -66,25 +70,76 @@ class Parser {
     }
 
     const decls = [];
-    while (this.ehKW('DECLARE')) this.declaracao(decls);
+    const funcoes = [];
+    for (;;) {
+      if (this.ehKW('DECLARE')) this.declaracao(decls);
+      else if (this.ehKW('CONSTANTE')) this.constante(decls);
+      else if (this.ehKW('FUNCAO', 'PROCEDIMENTO')) funcoes.push(this.subprograma());
+      else break;
+    }
 
+    if (this.atual.tipo === 'ID') {
+      const s = sugerir(this.atual.raw, ['DECLARE', 'CONSTANTE', 'FUNCAO', 'PROCEDIMENTO', 'INICIO']);
+      if (s) throw this.erro(`'${this.atual.raw}' não é uma palavra conhecida aqui. Você quis dizer ${s}?`);
+    }
     this.esperarKW('INICIO', 'para começar o algoritmo');
     const corpo = this.comandos(['FIMALGORITMO']);
     this.esperarKW('FIMALGORITMO');
     if (this.atual.tipo !== 'EOF') throw this.erro('Existe texto depois de FIMALGORITMO.');
-    return { tipo: 'Programa', nome, decls, corpo };
+    return { tipo: 'Programa', nome, decls, funcoes, corpo };
   }
 
-  nomeVariavel() {
+  nomeVariavel(rotulo = 'variável') {
     const tk = this.atual;
     if (tk.tipo === 'ID') {
       this.avancar();
       return { tipo: 'Var', nome: tk.valor, raw: tk.raw, linha: tk.linha, col: tk.col };
     }
     if (tk.tipo === 'KW' || tk.tipo === 'FN') {
-      throw this.erro(`'${tk.raw}' é uma palavra reservada e não pode ser usada como nome de variável.`);
+      throw this.erro(`'${tk.raw}' é uma palavra reservada e não pode ser usada como nome de ${rotulo}.`);
     }
-    throw this.erro(`Esperava o nome de uma variável, mas encontrei ${this.descrever(tk)}.`);
+    throw this.erro(`Esperava o nome de ${rotulo === 'variável' ? 'uma variável' : 'um ' + rotulo}, mas encontrei ${this.descrever(tk)}.`);
+  }
+
+  tipoEscalar() {
+    const tk = this.atual;
+    if (!(tk.tipo === 'KW' && NOMES_TIPOS.includes(tk.valor))) {
+      const s = tk.tipo === 'ID' ? sugerir(tk.raw, NOMES_TIPOS) : null;
+      throw this.erro(`Tipo desconhecido: ${this.descrever(tk)}. Tipos válidos: ${NOMES_TIPOS.join(', ')}.${s ? ` Você quis dizer ${s}?` : ''}`);
+    }
+    this.avancar();
+    return tk.valor;
+  }
+
+  /**
+   * Tipo de uma variável ou parâmetro: INTEIRO | VETOR[5] DE NUMERICO | MATRIZ[3][4] DE INTEIRO.
+   * modo 'parametro': vetores/matrizes não informam o tamanho (ex.: V : VETOR DE INTEIRO).
+   */
+  tipoDeclarado(modo) {
+    const tk = this.atual;
+    if (tk.tipo === 'KW' && (tk.valor === 'VETOR' || tk.valor === 'MATRIZ')) {
+      this.avancar();
+      const rank = tk.valor === 'VETOR' ? 1 : 2;
+      const dims = [];
+      if (this.ehOp('[')) {
+        if (modo === 'parametro') throw this.erro(`Em parâmetros não se informa o tamanho: use ${tk.raw} DE tipo.`);
+        while (this.ehOp('[')) {
+          this.avancar();
+          do { dims.push(this.expressao()); } while (this.ehOp(',') && this.avancar());
+          this.esperarOp(']', 'para fechar o tamanho');
+        }
+        if (dims.length !== rank) {
+          throw this.erro(rank === 1
+            ? 'VETOR tem uma dimensão: VETOR[5] DE tipo. Para duas dimensões use MATRIZ[3][4] DE tipo.'
+            : 'MATRIZ tem duas dimensões: MATRIZ[3][4] DE tipo (ou MATRIZ[3, 4]).', tk);
+        }
+      } else if (modo !== 'parametro') {
+        throw this.erro(`${tk.raw} precisa do tamanho entre colchetes, ex.: ${rank === 1 ? 'VETOR[5]' : 'MATRIZ[3][4]'} DE NUMERICO.`);
+      }
+      this.esperarKW('DE', `depois do tamanho do ${tk.raw}`);
+      return { tipo: this.tipoEscalar(), rank, dims: dims.length ? dims : null };
+    }
+    return { tipo: this.tipoEscalar(), rank: 0, dims: null };
   }
 
   declaracao(decls) {
@@ -93,14 +148,23 @@ class Parser {
       const nomes = [];
       do { nomes.push(this.nomeVariavel()); } while (this.ehOp(',') && this.avancar());
       this.esperarOp(':', 'depois dos nomes das variáveis');
-      const tk = this.atual;
-      if (!(tk.tipo === 'KW' && NOMES_TIPOS.includes(tk.valor))) {
-        throw this.erro(`Tipo desconhecido: ${this.descrever(tk)}. Tipos válidos: ${NOMES_TIPOS.join(', ')}.`);
-      }
-      this.avancar();
+      const t = this.tipoDeclarado('declaracao');
       this.esperarPontoVirgula();
-      decls.push({ nomes, tipo: tk.valor });
+      decls.push({ nomes, tipo: t.tipo, rank: t.rank, dims: t.dims, constante: false });
     } while (this.continuaDeclaracao());
+  }
+
+  /** CONSTANTE NOME : TIPO <- valor; */
+  constante(decls) {
+    this.avancar(); // CONSTANTE
+    const nome = this.nomeVariavel('constante');
+    this.esperarOp(':', 'depois do nome da constante');
+    const tipo = this.tipoEscalar();
+    if (!this.ehOp('<-', ':=')) throw this.erro(`Uma CONSTANTE precisa de valor: CONSTANTE ${nome.raw} : ${tipo} <- valor;`);
+    this.avancar();
+    const valor = this.expressao();
+    this.esperarPontoVirgula();
+    decls.push({ nomes: [nome], tipo, rank: 0, dims: null, constante: true, valor });
   }
 
   /** Permite várias declarações seguidas sob um único DECLARE. */
@@ -112,6 +176,41 @@ class Parser {
       return prox.tipo === 'OP' && (prox.valor === ':' || prox.valor === ',');
     }
     return false;
+  }
+
+  /** FUNCAO nome(a : TIPO, v : VETOR DE TIPO) : TIPO ... FIMFUNCAO   |   PROCEDIMENTO nome(...) ... FIMPROCEDIMENTO */
+  subprograma() {
+    const ini = this.avancar();
+    const ehFuncao = ini.valor === 'FUNCAO';
+    const fecha = ehFuncao ? 'FIMFUNCAO' : 'FIMPROCEDIMENTO';
+    const nome = this.nomeVariavel(ehFuncao ? 'função' : 'procedimento');
+    this.esperarOp('(', `depois do nome ${ehFuncao ? 'da função' : 'do procedimento'}`);
+    const params = [];
+    if (!this.ehOp(')')) {
+      do {
+        const pn = this.nomeVariavel('parâmetro');
+        this.esperarOp(':', 'depois do nome do parâmetro');
+        const t = this.tipoDeclarado('parametro');
+        params.push({ nome: pn, tipo: t.tipo, rank: t.rank });
+      } while (this.ehOp(',') && this.avancar());
+    }
+    this.esperarOp(')', 'para fechar a lista de parâmetros');
+    let retorno = null;
+    if (ehFuncao) {
+      this.esperarOp(':', 'depois dos parâmetros, para informar o tipo que a função devolve');
+      retorno = this.tipoEscalar();
+    }
+    const decls = [];
+    while (this.ehKW('DECLARE', 'CONSTANTE')) {
+      if (this.ehKW('DECLARE')) this.declaracao(decls); else this.constante(decls);
+    }
+    this.esperarKW('INICIO', `para começar o corpo ${ehFuncao ? 'da função' : 'do procedimento'}`);
+    const corpo = this.comandos([fecha]);
+    this.esperarKW(fecha);
+    return {
+      tipo: ehFuncao ? 'Funcao' : 'Procedimento', nome: nome.nome, raw: nome.raw, params, retorno, decls, corpo,
+      linha: nome.linha, col: nome.col,
+    };
   }
 
   // ---------- comandos ----------
@@ -133,13 +232,25 @@ class Parser {
     const a = this.atual;
     if (a.tipo === 'KW') {
       switch (a.valor) {
-        case 'ESCREVA': return this.escreva();
+        case 'ESCREVA': return this.escreva(false);
+        case 'ESCREVA_SEM_QUEBRA': return this.escreva(true);
         case 'LEIA': return this.leia();
         case 'SE': return this.se();
         case 'ESCOLHA': return this.escolha();
         case 'ENQUANTO': return this.enquanto();
         case 'REPITA': return this.repita();
         case 'PARA': return this.para();
+        case 'RETORNE': {
+          this.avancar();
+          const valor = this.ehOp(';') ? null : this.expressao();
+          this.esperarPontoVirgula();
+          return { tipo: 'Retorne', valor, linha: a.linha, col: a.col };
+        }
+        case 'INTERROMPA':
+        case 'CONTINUE':
+          this.avancar();
+          this.esperarPontoVirgula();
+          return { tipo: a.valor === 'INTERROMPA' ? 'Interrompa' : 'Continue', linha: a.linha, col: a.col };
         case 'INICIO': {
           this.avancar();
           const corpo = this.comandos(['FIM']);
@@ -147,40 +258,79 @@ class Parser {
           return { tipo: 'Bloco', corpo, linha: a.linha, col: a.col };
         }
         case 'DECLARE':
-          throw this.erro('As declarações (DECLARE) devem ficar antes do INICIO do algoritmo.');
+        case 'CONSTANTE':
+          throw this.erro('As declarações (DECLARE / CONSTANTE) devem ficar antes do INICIO do algoritmo.');
+        case 'FUNCAO':
+        case 'PROCEDIMENTO':
+          throw this.erro(`${a.raw} deve ser escrito antes do INICIO do algoritmo, depois das declarações.`);
         default:
           throw this.erro(`'${a.raw}' não pode aparecer aqui: não há comando aberto que ele possa fechar ou continuar.`);
       }
     }
-    if (a.tipo === 'ID') return this.atribuicao();
+    if (a.tipo === 'ID') {
+      const prox = this.espiar();
+      if (prox.tipo === 'OP' && prox.valor === '(') return this.chamadaProcedimento();
+      return this.atribuicao();
+    }
     if (a.tipo === 'FN') throw this.erro(`'${a.raw}' é uma função: use-a dentro de uma expressão (ex.: X <- ${a.raw}(...);).`);
     throw this.erro(`Comando inválido: ${this.descrever(a)}.`);
   }
 
-  escreva() {
-    const ini = this.avancar();
-    this.esperarOp('(', 'depois de ESCREVA');
+  argumentos() {
     const args = [];
     if (!this.ehOp(')')) {
       do { args.push(this.expressao()); } while (this.ehOp(',') && this.avancar());
     }
-    this.esperarOp(')', 'para fechar o ESCREVA');
+    return args;
+  }
+
+  chamadaProcedimento() {
+    const tk = this.avancar();
+    this.avancar(); // (
+    const args = this.argumentos();
+    this.esperarOp(')', `para fechar a chamada de ${tk.raw}`);
     this.esperarPontoVirgula();
-    return { tipo: 'Escreva', args, linha: ini.linha, col: ini.col };
+    const chamada = { tipo: 'ChamadaUsuario', nome: tk.valor, raw: tk.raw, args, linha: tk.linha, col: tk.col };
+    return { tipo: 'ChamadaProc', chamada, linha: tk.linha, col: tk.col };
+  }
+
+  escreva(semQuebra) {
+    const ini = this.avancar();
+    this.esperarOp('(', `depois de ${ini.raw}`);
+    const args = this.argumentos();
+    this.esperarOp(')', `para fechar o ${ini.raw}`);
+    this.esperarPontoVirgula();
+    return { tipo: 'Escreva', args, semQuebra, linha: ini.linha, col: ini.col };
+  }
+
+  /** Variável simples (X) ou posição de vetor/matriz (V[i], M[i][j], M[i, j]). */
+  alvo() {
+    const v = this.nomeVariavel();
+    return this.ehOp('[') ? this.indices(v) : v;
+  }
+
+  indices(v) {
+    const lista = [];
+    while (this.ehOp('[')) {
+      this.avancar();
+      do { lista.push(this.expressao()); } while (this.ehOp(',') && this.avancar());
+      this.esperarOp(']', 'para fechar o índice');
+    }
+    return { tipo: 'Indice', nome: v.nome, raw: v.raw, indices: lista, linha: v.linha, col: v.col };
   }
 
   leia() {
     const ini = this.avancar();
     this.esperarOp('(', 'depois de LEIA');
     const vars = [];
-    do { vars.push(this.nomeVariavel()); } while (this.ehOp(',') && this.avancar());
+    do { vars.push(this.alvo()); } while (this.ehOp(',') && this.avancar());
     this.esperarOp(')', 'para fechar o LEIA');
     this.esperarPontoVirgula();
     return { tipo: 'Leia', vars, linha: ini.linha, col: ini.col };
   }
 
   atribuicao() {
-    const alvo = this.nomeVariavel();
+    const alvo = this.alvo();
     const op = this.atual;
     const mk = (valor) => ({ tipo: 'Atribuicao', alvo, valor, linha: alvo.linha, col: alvo.col });
     const binario = (o, dir) => ({ tipo: 'Binario', op: o, esq: alvo, dir, linha: op.linha, col: op.col });
@@ -207,6 +357,10 @@ class Parser {
         throw this.erro("Para guardar um valor numa variável use '<-'. O sinal '=' serve para comparar valores.");
       }
     }
+    if (alvo.tipo === 'Var') {
+      const s = sugerir(alvo.raw, PALAVRAS_ESTRUTURA);
+      if (s) throw this.erro(`'${alvo.raw}' não é um comando conhecido. Você quis dizer ${s}?`, alvo);
+    }
     throw this.erro(`Depois de '${alvo.raw}' esperava '<-' (atribuição), '++' ou '--', mas encontrei ${this.descrever(op)}.`);
   }
 
@@ -222,14 +376,13 @@ class Parser {
     ramo();
     while (this.ehKW('SENAO')) {
       const tkSenao = this.avancar();
-
+      // "SENAO SE" na MESMA linha = else if (mesmo FIMSE). SE em outra linha = SE aninhado dentro do SENAO.
       if (this.ehKW('SE') && this.atual.linha === tkSenao.linha) { this.avancar(); ramo(); continue; }
-      
       senao = this.comandos(['FIMSE']);
       break;
     }
-    const fim = this.esperarKW('FIMSE', 'para fechar o SE');
-    return { tipo: 'Se', ramos, senao, linha: ramos[0].cond.linha, col: ramos[0].cond.col, fim };
+    this.esperarKW('FIMSE', 'para fechar o SE');
+    return { tipo: 'Se', ramos, senao, linha: ramos[0].cond.linha, col: ramos[0].cond.col };
   }
 
   escolha() {
@@ -377,18 +530,23 @@ class Parser {
     switch (tk.tipo) {
       case 'NUM': this.avancar(); return { tipo: 'Num', valor: tk.valor, ...pos };
       case 'STR': this.avancar(); return { tipo: 'Str', valor: tk.valor, ...pos };
-      case 'ID':
-        if (this.espiar().tipo === 'OP' && this.espiar().valor === '(') {
-          throw this.erro(`'${tk.raw}' não é uma função conhecida.`);
+      case 'ID': {
+        const prox = this.espiar();
+        if (prox.tipo === 'OP' && prox.valor === '(') { // chamada de FUNCAO do usuário
+          this.avancar(); this.avancar();
+          const args = this.argumentos();
+          this.esperarOp(')', `para fechar a chamada de ${tk.raw}`);
+          return { tipo: 'ChamadaUsuario', nome: tk.valor, raw: tk.raw, args, ...pos };
         }
         this.avancar();
-        return { tipo: 'Var', nome: tk.valor, raw: tk.raw, ...pos };
+        const v = { tipo: 'Var', nome: tk.valor, raw: tk.raw, ...pos };
+        return this.ehOp('[') ? this.indices(v) : v;
+      }
       case 'FN': {
         this.avancar();
         if (!this.ehOp('(')) throw this.erro(`A função ${tk.raw} precisa de parênteses: ${tk.raw}(...).`);
         this.avancar();
-        const args = [];
-        if (!this.ehOp(')')) { do { args.push(this.expressao()); } while (this.ehOp(',') && this.avancar()); }
+        const args = this.argumentos();
         this.esperarOp(')', `para fechar a chamada de ${tk.raw}`);
         return { tipo: 'Chamada', nome: tk.valor, raw: tk.raw, args, ...pos };
       }

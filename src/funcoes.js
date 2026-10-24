@@ -1,6 +1,6 @@
 'use strict';
 
-const { formatar, TIPOS_INFO } = require('./tipos');
+const { formatar, formatarDecimais, TIPOS_INFO } = require('./tipos');
 
 /**
  * Funções pré-definidas. Para criar uma nova, basta acrescentar uma entrada aqui:
@@ -61,6 +61,12 @@ const DEFS = [
     } },
   // posição começando em 1; 0 = não encontrado
   { nomes: ['LOCALIZAR'], params: ['texto', 'texto'], retorno: 'numero', fn: (sub, t) => t.indexOf(sub) + 1 },
+  // FORMATAR(valor, casas): texto com número fixo de casas decimais, ex.: FORMATAR(3.14159, 2) -> "3.14"
+  { nomes: ['FORMATAR'], params: ['numero', 'numero'], retorno: 'texto',
+    fn: (v, casas) => {
+      if (!Number.isInteger(casas) || casas < 0 || casas > 20) throw new Error('as casas decimais devem ser um inteiro entre 0 e 20.');
+      return formatarDecimais(v, casas);
+    } },
   { nomes: ['PARA_TEXTO'], params: ['qualquer'], retorno: 'texto', fn: (v) => formatar(v) },
   { nomes: ['PARA_NUMERO'], params: ['texto'], retorno: 'numero',
     fn: (t) => {

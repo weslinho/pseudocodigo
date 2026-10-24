@@ -1,0 +1,41 @@
+ALGORITMO FUNCOES_E_PROCEDIMENTOS:
+    DECLARE N : INTEIRO;
+    DECLARE V : VETOR[5] DE INTEIRO;
+    DECLARE I : INTEIRO;
+
+    FUNCAO FATORIAL(X : INTEIRO) : INTEIRO
+    INICIO
+        SE (X <= 1) ENTAO
+            RETORNE 1;
+        FIMSE
+        RETORNE X * FATORIAL(X - 1);
+    FIMFUNCAO
+
+    FUNCAO EH_PAR(X : INTEIRO) : LOGICOS
+    INICIO
+        RETORNE X MOD 2 = 0;
+    FIMFUNCAO
+
+    PROCEDIMENTO QUADRADOS(LISTA : VETOR DE INTEIRO, TAM : INTEIRO)
+        DECLARE K : INTEIRO;
+    INICIO
+        PARA K DE 1 ATE TAM FACA
+            LISTA[K] <- K * K;      # vetores são passados por referência
+        FIMPARA
+    FIMPROCEDIMENTO
+INICIO
+    ESCREVA_SEM_QUEBRA("Digite um número: ");
+    LEIA(N);
+    ESCREVA(N, "! =", FATORIAL(N));
+    SE (EH_PAR(N)) ENTAO
+        ESCREVA(N, "é par");
+    SENAO
+        ESCREVA(N, "é ímpar");
+    FIMSE
+
+    QUADRADOS(V, 5);
+    PARA I DE 1 ATE 5 FACA
+        ESCREVA_SEM_QUEBRA(V[I], " ");
+    FIMPARA
+    ESCREVA("");
+FIMALGORITMO

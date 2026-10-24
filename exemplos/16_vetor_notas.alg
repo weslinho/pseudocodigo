@@ -1,0 +1,24 @@
+ALGORITMO NOTAS_DA_TURMA:
+    CONSTANTE QTD : INTEIRO <- 5;
+    DECLARE NOTAS : VETOR[QTD] DE NUMERICO;
+    DECLARE I, ACIMA : INTEIRO;
+    DECLARE SOMA, MEDIA : NUMERICO;
+INICIO
+    SOMA <- 0;
+    PARA I DE 1 ATE QTD FACA
+        ESCREVA_SEM_QUEBRA("Nota do aluno " + PARA_TEXTO(I) + ": ");
+        LEIA(NOTAS[I]);
+        SOMA <- SOMA + NOTAS[I];
+    FIMPARA
+
+    MEDIA <- SOMA / QTD;
+    ACIMA <- 0;
+    PARA I DE 1 ATE QTD FACA
+        SE (NOTAS[I] > MEDIA) ENTAO
+            ACIMA++;
+        FIMSE
+    FIMPARA
+
+    ESCREVA("Média da turma:", FORMATAR(MEDIA, 2));
+    ESCREVA("Alunos acima da média:", ACIMA);
+FIMALGORITMO

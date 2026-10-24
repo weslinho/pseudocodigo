@@ -4,7 +4,7 @@ const { PseudoError } = require('./erros');
 const { normalizar, RESERVADAS, NOMES_FUNCOES } = require('./palavras');
 
 const OPS_DOIS = ['<-', ':=', '<>', '<=', '>=', '!=', '==', '++', '--', '+=', '-=', '*=', '/=', '..'];
-const OPS_UM = '+-*/^%(),;:=<>';
+const OPS_UM = '+-*/^%(),;:=<>[]';
 
 /**
  * Transforma o texto do programa em tokens.

@@ -22,6 +22,7 @@
   --giz-suave: #9fb0a6;
   --giz-amarelo: #f2d16b;
   --giz-rosa: #ff9aa2;
+  --giz-laranja: #ffb86b;
 
   --c-kw: #1f4fd8;
   --c-tipo: #862e9c;
@@ -196,6 +197,7 @@ button.principal:hover:not(:disabled) { filter: brightness(1.08); border-color: 
 .lousa pre:empty::before { content: attr(data-vazio); color: var(--giz-suave); font-family: var(--sans); }
 .lousa .e { color: var(--giz-rosa); }
 .lousa .i { color: var(--giz-amarelo); }
+.lousa .a { color: var(--giz-laranja); }
 .lousa .s { color: var(--giz-suave); }
 .entrada { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
 .entrada .seta { color: var(--giz-amarelo); }
@@ -310,7 +312,10 @@ button.principal:hover:not(:disabled) { filter: brightness(1.08); border-color: 
     '05_repita': 'Contagem com REPITA',
     '06_para_tabuada': 'Tabuada com PARA',
     '07_bhaskara': 'Equação do 2º grau (Bhaskara)',
-    '08_tipos_e_funcoes': 'Tipos e funções'
+    '08_tipos_e_funcoes': 'Tipos e funções',
+    '16_vetor_notas': 'Vetor: notas da turma',
+    '17_funcoes_e_procedimentos': 'Funções e procedimentos',
+    '18_matriz_busca': 'Matriz e busca'
   };
 
   var el = {
@@ -539,6 +544,7 @@ button.principal:hover:not(:disabled) { filter: brightness(1.08); border-color: 
         }
         acrescentar(texto);
       },
+      avisar: function (texto) { acrescentar(texto, 'a'); },
       lerLinha: function () {
         return new Promise(function (resolver, rejeitar) {
           var sinal = controlador.signal;
@@ -638,8 +644,9 @@ button.principal:hover:not(:disabled) { filter: brightness(1.08); border-color: 
     limparSaida();
     marcarErro(null);
     try {
-      P.compilar(fonte);
-      acrescentar('Nenhum erro encontrado.\n', 's');
+      var avisos = P.compilar(fonte).avisos || [];
+      avisos.forEach(function (a) { acrescentar(P.formatarErro(a, fonte) + '\n\n', 'a'); });
+      acrescentar(avisos.length ? 'Nenhum erro, mas ' + avisos.length + ' aviso(s).\n' : 'Nenhum erro encontrado.\n', 's');
       definirEstado('ok');
     } catch (e) {
       mostrarErro(e, fonte);
